@@ -1,0 +1,155 @@
+import { PatientService } from './patient.service';
+import { CreatePatientDto, UpdatePatientDto } from './dto';
+export declare class PatientController {
+    private patientService;
+    constructor(patientService: PatientService);
+    create(dto: CreatePatientDto, req: any): Promise<{
+        id: string;
+        address: string | null;
+        city: string | null;
+        state: string | null;
+        zipCode: string | null;
+        phone: string;
+        createdAt: Date;
+        updatedAt: Date;
+        email: string | null;
+        firstName: string;
+        lastName: string;
+        hospitalId: string;
+        mrn: string;
+        dateOfBirth: Date;
+        gender: import("@prisma/client").$Enums.Gender;
+        emergencyContact: import("@prisma/client/runtime/library").JsonValue | null;
+        bloodGroup: string | null;
+        allergies: string | null;
+        deletedAt: Date | null;
+    }>;
+    findAll(page?: string, limit?: string, search?: string, req?: any): Promise<{
+        data: {
+            id: string;
+            address: string | null;
+            city: string | null;
+            state: string | null;
+            zipCode: string | null;
+            phone: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string | null;
+            firstName: string;
+            lastName: string;
+            hospitalId: string;
+            mrn: string;
+            dateOfBirth: Date;
+            gender: import("@prisma/client").$Enums.Gender;
+            emergencyContact: import("@prisma/client/runtime/library").JsonValue | null;
+            bloodGroup: string | null;
+            allergies: string | null;
+            deletedAt: Date | null;
+        }[];
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+        };
+    }>;
+    findOne(id: string, req: any): Promise<{
+        appointments: ({
+            provider: {
+                id: string;
+                firstName: string;
+                lastName: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            hospitalId: string;
+            appointmentDate: Date;
+            durationMinutes: number;
+            status: import("@prisma/client").$Enums.AppointmentStatus;
+            reason: string | null;
+            notes: string | null;
+            patientId: string;
+            providerId: string;
+        })[];
+        invoices: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            hospitalId: string;
+            notes: string | null;
+            patientId: string;
+            invoiceNumber: string;
+            subtotalCents: number;
+            taxRate: import("@prisma/client/runtime/library").Decimal;
+            taxAmountCents: number;
+            discountCents: number;
+            totalCents: number;
+            paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
+            appointmentId: string;
+        }[];
+    } & {
+        id: string;
+        address: string | null;
+        city: string | null;
+        state: string | null;
+        zipCode: string | null;
+        phone: string;
+        createdAt: Date;
+        updatedAt: Date;
+        email: string | null;
+        firstName: string;
+        lastName: string;
+        hospitalId: string;
+        mrn: string;
+        dateOfBirth: Date;
+        gender: import("@prisma/client").$Enums.Gender;
+        emergencyContact: import("@prisma/client/runtime/library").JsonValue | null;
+        bloodGroup: string | null;
+        allergies: string | null;
+        deletedAt: Date | null;
+    }>;
+    update(id: string, dto: UpdatePatientDto, req: any): Promise<{
+        id: string;
+        address: string | null;
+        city: string | null;
+        state: string | null;
+        zipCode: string | null;
+        phone: string;
+        createdAt: Date;
+        updatedAt: Date;
+        email: string | null;
+        firstName: string;
+        lastName: string;
+        hospitalId: string;
+        mrn: string;
+        dateOfBirth: Date;
+        gender: import("@prisma/client").$Enums.Gender;
+        emergencyContact: import("@prisma/client/runtime/library").JsonValue | null;
+        bloodGroup: string | null;
+        allergies: string | null;
+        deletedAt: Date | null;
+    }>;
+    remove(id: string, req: any): Promise<{
+        id: string;
+        address: string | null;
+        city: string | null;
+        state: string | null;
+        zipCode: string | null;
+        phone: string;
+        createdAt: Date;
+        updatedAt: Date;
+        email: string | null;
+        firstName: string;
+        lastName: string;
+        hospitalId: string;
+        mrn: string;
+        dateOfBirth: Date;
+        gender: import("@prisma/client").$Enums.Gender;
+        emergencyContact: import("@prisma/client/runtime/library").JsonValue | null;
+        bloodGroup: string | null;
+        allergies: string | null;
+        deletedAt: Date | null;
+    }>;
+}

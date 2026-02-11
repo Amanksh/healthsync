@@ -1,0 +1,215 @@
+// Hospital Management System - Multi-Tenant Prisma Schema
+// Each hospital's data is isolated via hospitalId foreign keys
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  DOCTOR
+  RECEPTIONIST
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  UNKNOWN
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  PARTIALLY_PAID
+}
+
+enum InvoiceItemCategory {
+  CONSULTATION
+  LAB_TEST
+  MEDICATION
+  PROCEDURE
+  OTHER
+}
+
+// ─── Hospital / Tenant ───────────────────────────────────────────────────────
+
+model Hospital {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String                              // Organization name
+  branch      String?                             // Branch/location name
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?  @map("zip_code")
+  phone       String?
+  managerName String?  @map("manager_name")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  users        User[]
+  patients     Patient[]
+  appointments Appointment[]
+  invoices     Invoice[]
+
+  @@map("hospitals")
+}
+
+// ─── User / Auth ─────────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  password  String
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  role      Role     @default(DOCTOR)
+  phone     String?
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Tenant — nullable for SUPER_ADMIN (not tied to any hospital)
+  hospitalId String?   @map("hospital_id") @db.Uuid
+  hospital   Hospital? @relation(fields: [hospitalId], references: [id])
+
+  // A doctor can be a provider for appointments
+  appointments Appointment[] @relation("ProviderAppointments")
+
+  @@index([hospitalId])
+  @@map("users")
+}
+
+// ─── Patient ─────────────────────────────────────────────────────────────────
+
+model Patient {
+  id               String    @id @default(uuid()) @db.Uuid
+  mrn              String    @unique @map("medical_record_number") // Medical Record Number
+  firstName        String    @map("first_name")
+  lastName         String    @map("last_name")
+  dateOfBirth      DateTime  @map("date_of_birth") @db.Date
+  gender           Gender
+  email            String?
+  phone            String
+  address          String?
+  city             String?
+  state            String?
+  zipCode          String?   @map("zip_code")
+  emergencyContact Json?     @map("emergency_contact") // { name, relationship, phone }
+  bloodGroup       String?   @map("blood_group")
+  allergies        String?
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  deletedAt        DateTime? @map("deleted_at") // Soft delete
+
+  // Tenant
+  hospitalId String   @map("hospital_id") @db.Uuid
+  hospital   Hospital @relation(fields: [hospitalId], references: [id])
+
+  appointments Appointment[]
+  invoices     Invoice[]
+
+  @@index([lastName, firstName])
+  @@index([deletedAt])
+  @@index([hospitalId])
+  @@map("patients")
+}
+
+// ─── Appointment ─────────────────────────────────────────────────────────────
+
+model Appointment {
+  id              String            @id @default(uuid()) @db.Uuid
+  appointmentDate DateTime          @map("appointment_date")
+  durationMinutes Int               @default(30) @map("duration_minutes")
+  status          AppointmentStatus @default(SCHEDULED)
+  reason          String?
+  notes           String?
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  patientId  String  @map("patient_id") @db.Uuid
+  patient    Patient @relation(fields: [patientId], references: [id])
+  providerId String  @map("provider_id") @db.Uuid
+  provider   User    @relation("ProviderAppointments", fields: [providerId], references: [id])
+
+  // Tenant
+  hospitalId String   @map("hospital_id") @db.Uuid
+  hospital   Hospital @relation(fields: [hospitalId], references: [id])
+
+  invoice Invoice?
+
+  @@index([appointmentDate])
+  @@index([status])
+  @@index([patientId])
+  @@index([providerId])
+  @@index([hospitalId])
+  @@map("appointments")
+}
+
+// ─── Invoice ─────────────────────────────────────────────────────────────────
+
+model Invoice {
+  id              String        @id @default(uuid()) @db.Uuid
+  invoiceNumber   String        @unique @map("invoice_number")
+  subtotalCents   Int           @map("subtotal_cents") // Amount in cents to avoid floating-point
+  taxRate         Decimal       @default(0) @map("tax_rate") @db.Decimal(5, 4) // e.g. 0.1800 for 18%
+  taxAmountCents  Int           @map("tax_amount_cents")
+  discountCents   Int           @default(0) @map("discount_cents")
+  totalCents      Int           @map("total_cents")
+  paymentStatus   PaymentStatus @default(PENDING) @map("payment_status")
+  notes           String?
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  appointmentId String      @unique @map("appointment_id") @db.Uuid
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  patientId     String      @map("patient_id") @db.Uuid
+  patient       Patient     @relation(fields: [patientId], references: [id])
+
+  // Tenant
+  hospitalId String   @map("hospital_id") @db.Uuid
+  hospital   Hospital @relation(fields: [hospitalId], references: [id])
+
+  items InvoiceItem[]
+
+  @@index([paymentStatus])
+  @@index([patientId])
+  @@index([hospitalId])
+  @@map("invoices")
+}
+
+// ─── Invoice Item ────────────────────────────────────────────────────────────
+
+model InvoiceItem {
+  id             String              @id @default(uuid()) @db.Uuid
+  description    String
+  category       InvoiceItemCategory @default(OTHER)
+  unitPriceCents Int                 @map("unit_price_cents")
+  quantity       Int                 @default(1)
+  totalCents     Int                 @map("total_cents") // unitPriceCents * quantity
+
+  // Relation
+  invoiceId String  @map("invoice_id") @db.Uuid
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("invoice_items")
+}
+
