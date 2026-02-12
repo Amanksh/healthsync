@@ -127,8 +127,8 @@ export default function HospitalFormModal({ isOpen, onClose, onSubmit, hospital 
     };
 
     const inputClass =
-        'w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all text-sm';
-    const labelClass = 'block text-sm font-medium text-slate-300 mb-1.5';
+        'w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-sm';
+    const labelClass = 'block text-sm font-medium text-gray-700 mb-1.5';
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? 'Edit Hospital' : 'Add New Hospital'}>
@@ -230,14 +230,14 @@ export default function HospitalFormModal({ isOpen, onClose, onSubmit, hospital 
 
                 {/* Admin Account — only on create */}
                 {!isEditing && (
-                    <div className="pt-4 border-t border-slate-700">
-                        <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <div className="pt-4 border-t border-gray-200">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                             </svg>
                             Admin Account
                         </h3>
-                        <p className="text-xs text-slate-500 mb-4">Create an admin user who will manage this hospital.</p>
+                        <p className="text-xs text-gray-400 mb-4">Create an admin user who will manage this hospital.</p>
                         <div className="space-y-4">
                             {/* Admin Name */}
                             <div className="grid grid-cols-2 gap-4">
@@ -294,18 +294,18 @@ export default function HospitalFormModal({ isOpen, onClose, onSubmit, hospital 
                 )}
 
                 {/* Actions */}
-                <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-5 py-2.5 text-sm font-medium text-slate-300 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors"
+                        className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         disabled={submitting}
-                        className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl hover:from-blue-500 hover:to-blue-400 transition-all disabled:opacity-50"
+                        className="px-5 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-xl hover:bg-teal-500 transition-colors disabled:opacity-50 shadow-sm shadow-teal-200"
                     >
                         {submitting ? 'Saving...' : isEditing ? 'Update Hospital' : 'Create Hospital'}
                     </button>

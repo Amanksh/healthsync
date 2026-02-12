@@ -23,9 +23,9 @@ interface Invoice {
 }
 
 const statusColors: Record<string, string> = {
-    PENDING: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-    PAID: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-    PARTIALLY_PAID: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    PENDING: 'bg-amber-50 text-amber-700 border-amber-200',
+    PAID: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    PARTIALLY_PAID: 'bg-blue-50 text-blue-700 border-blue-200',
 };
 
 const paymentStatusFilters = ['ALL', 'PENDING', 'PAID', 'PARTIALLY_PAID'];
@@ -83,11 +83,11 @@ export default function BillingPage() {
     const columns: Column<Invoice>[] = [
         {
             key: 'invoiceNumber', header: 'Invoice #',
-            render: (inv) => <span className="font-mono text-xs text-blue-400">{inv.invoiceNumber}</span>
+            render: (inv) => <span className="font-mono text-xs text-teal-600 bg-teal-50 px-2 py-0.5 rounded">{inv.invoiceNumber}</span>
         },
         {
             key: 'patient', header: 'Patient',
-            render: (inv) => <span className="text-white font-medium">{inv.patient.firstName} {inv.patient.lastName}</span>
+            render: (inv) => <span className="text-gray-900 font-medium">{inv.patient.firstName} {inv.patient.lastName}</span>
         },
         {
             key: 'createdAt', header: 'Date',
@@ -105,7 +105,7 @@ export default function BillingPage() {
         },
         {
             key: 'totalCents', header: 'Total',
-            render: (inv) => <span className="font-semibold text-white">{formatCurrency(inv.totalCents)}</span>,
+            render: (inv) => <span className="font-semibold text-gray-900">{formatCurrency(inv.totalCents)}</span>,
             className: 'text-right',
         },
         {
@@ -121,7 +121,7 @@ export default function BillingPage() {
                 inv.paymentStatus === 'PENDING' ? (
                     <button
                         onClick={() => handleMarkPaid(inv.id)}
-                        className="px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                        className="px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-200 text-emerald-600 hover:bg-emerald-50 transition-colors"
                     >
                         Mark Paid
                     </button>
@@ -134,12 +134,12 @@ export default function BillingPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Billing & Invoices</h1>
-                    <p className="text-slate-400 mt-1">Manage invoices and payments</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Billing & Invoices</h1>
+                    <p className="text-gray-500 mt-1">Manage invoices and payments</p>
                 </div>
                 <button
                     onClick={() => setShowForm(true)}
-                    className="px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-medium text-sm hover:from-blue-500 hover:to-cyan-400 transition-all shadow-lg shadow-blue-500/20"
+                    className="px-4 py-2.5 rounded-xl bg-teal-600 text-white font-medium text-sm hover:bg-teal-500 transition-colors shadow-sm shadow-teal-200"
                 >
                     + Create Invoice
                 </button>
@@ -151,9 +151,9 @@ export default function BillingPage() {
                     <button
                         key={s}
                         onClick={() => { setStatusFilter(s); setPage(1); }}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${statusFilter === s
-                            ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                            : 'text-slate-400 border border-slate-800 hover:bg-slate-800/50'
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${statusFilter === s
+                            ? 'bg-teal-50 text-teal-700 border border-teal-200'
+                            : 'text-gray-500 border border-gray-200 hover:bg-gray-50'
                             }`}
                     >
                         {s === 'ALL' ? 'All' : s.replace('_', ' ')}

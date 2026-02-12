@@ -76,15 +76,15 @@ export default function UsersPage() {
     if (!canAccess) {
         return (
             <div className="flex items-center justify-center h-full">
-                <p className="text-slate-400 text-lg">Access denied. Admin privileges required.</p>
+                <p className="text-gray-400 text-lg">Access denied. Admin privileges required.</p>
             </div>
         );
     }
 
     const roleBadgeColors: Record<string, string> = {
-        ADMIN: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-        DOCTOR: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-        RECEPTIONIST: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+        ADMIN: 'bg-rose-50 text-rose-700 border-rose-200',
+        DOCTOR: 'bg-blue-50 text-blue-700 border-blue-200',
+        RECEPTIONIST: 'bg-amber-50 text-amber-700 border-amber-200',
     };
 
     const columns: Column<User>[] = [
@@ -92,7 +92,7 @@ export default function UsersPage() {
             key: 'name',
             header: 'Name',
             render: (row: User) => (
-                <span className="font-medium text-white">{row.firstName} {row.lastName}</span>
+                <span className="font-medium text-gray-900">{row.firstName} {row.lastName}</span>
             ),
         },
         { key: 'email', header: 'Email' },
@@ -100,7 +100,7 @@ export default function UsersPage() {
             key: 'role',
             header: 'Role',
             render: (row: User) => (
-                <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${roleBadgeColors[row.role] || 'bg-slate-700 text-slate-300'}`}>
+                <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${roleBadgeColors[row.role] || 'bg-gray-50 text-gray-600 border-gray-200'}`}>
                     {row.role}
                 </span>
             ),
@@ -111,8 +111,8 @@ export default function UsersPage() {
             header: 'Status',
             render: (row: User) => (
                 <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${row.isActive
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                    : 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : 'bg-rose-50 text-rose-700 border-rose-200'
                     }`}>
                     {row.isActive ? 'Active' : 'Inactive'}
                 </span>
@@ -125,7 +125,7 @@ export default function UsersPage() {
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => setEditingUser(row)}
-                        className="p-1.5 text-slate-400 hover:text-blue-400 transition-colors"
+                        className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
                         title="Edit"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -134,7 +134,7 @@ export default function UsersPage() {
                     </button>
                     <button
                         onClick={() => handleToggleActive(row.id)}
-                        className={`p-1.5 transition-colors ${row.isActive ? 'text-slate-400 hover:text-amber-400' : 'text-slate-400 hover:text-emerald-400'}`}
+                        className={`p-1.5 rounded-lg transition-colors ${row.isActive ? 'text-gray-400 hover:text-amber-600 hover:bg-amber-50' : 'text-gray-400 hover:text-emerald-600 hover:bg-emerald-50'}`}
                         title={row.isActive ? 'Deactivate' : 'Activate'}
                     >
                         {row.isActive ? (
@@ -157,12 +157,12 @@ export default function UsersPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Staff</h1>
-                    <p className="text-slate-400 mt-1">Manage doctors, receptionists, and staff</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Staff</h1>
+                    <p className="text-gray-500 mt-1">Manage doctors, receptionists, and staff</p>
                 </div>
                 <button
                     onClick={() => setShowCreateModal(true)}
-                    className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl hover:from-blue-500 hover:to-blue-400 transition-all shadow-lg shadow-blue-500/20"
+                    className="px-5 py-2.5 text-sm font-semibold text-white bg-teal-600 rounded-xl hover:bg-teal-500 transition-colors shadow-sm shadow-teal-200"
                 >
                     + Add Staff
                 </button>
@@ -170,7 +170,7 @@ export default function UsersPage() {
 
             {/* Search */}
             <div className="relative max-w-md">
-                <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                 </svg>
                 <input
@@ -178,7 +178,7 @@ export default function UsersPage() {
                     placeholder="Search by name or email..."
                     value={search}
                     onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all text-sm"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-sm"
                 />
             </div>
 

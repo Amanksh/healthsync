@@ -43,16 +43,16 @@ export default function Modal({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+                className="absolute inset-0 bg-gray-900/30 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
             />
 
             {/* Modal Panel */}
-            <div className={`relative w-full ${sizeClasses[size]} bg-slate-900 rounded-2xl shadow-2xl transform transition-all border border-slate-800 max-h-[90vh] flex flex-col`} >
+            <div className={`relative w-full ${sizeClasses[size]} bg-white rounded-2xl shadow-xl transform transition-all border border-gray-100 max-h-[90vh] flex flex-col`} >
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-slate-800">
-                    <h3 className="text-lg font-semibold text-white">{title}</h3>
-                    <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+                <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                    <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>

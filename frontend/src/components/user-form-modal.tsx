@@ -85,8 +85,8 @@ export default function UserFormModal({ isOpen, onClose, onSubmit, user }: UserF
     };
 
     const inputClass =
-        'w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all text-sm';
-    const labelClass = 'block text-sm font-medium text-slate-300 mb-1.5';
+        'w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-sm';
+    const labelClass = 'block text-sm font-medium text-gray-700 mb-1.5';
 
     const roleOptions = [
         { value: 'DOCTOR', label: 'Doctor' },
@@ -184,18 +184,18 @@ export default function UserFormModal({ isOpen, onClose, onSubmit, user }: UserF
                 </div>
 
                 {/* Actions */}
-                <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-5 py-2.5 text-sm font-medium text-slate-300 bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors"
+                        className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         disabled={submitting}
-                        className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl hover:from-blue-500 hover:to-blue-400 transition-all disabled:opacity-50"
+                        className="px-5 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-xl hover:bg-teal-500 transition-colors disabled:opacity-50 shadow-sm shadow-teal-200"
                     >
                         {submitting ? 'Saving...' : isEditing ? 'Update' : 'Create User'}
                     </button>

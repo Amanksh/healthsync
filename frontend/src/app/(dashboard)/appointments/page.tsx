@@ -19,10 +19,10 @@ interface Appointment {
 }
 
 const statusColors: Record<string, string> = {
-    SCHEDULED: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-    COMPLETED: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-    CANCELLED: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-    NO_SHOW: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    SCHEDULED: 'bg-blue-50 text-blue-700 border-blue-200',
+    COMPLETED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    CANCELLED: 'bg-rose-50 text-rose-700 border-rose-200',
+    NO_SHOW: 'bg-amber-50 text-amber-700 border-amber-200',
 };
 
 const statusFilters = ['ALL', 'SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'];
@@ -93,20 +93,20 @@ export default function AppointmentsPage() {
     const columns: Column<Appointment>[] = [
         {
             key: 'appointmentDate', header: 'Date & Time',
-            render: (a) => <span className="font-medium text-white">{formatDateTime(a.appointmentDate)}</span>
+            render: (a) => <span className="font-medium text-gray-900">{formatDateTime(a.appointmentDate)}</span>
         },
         {
             key: 'patient', header: 'Patient',
             render: (a) => (
                 <div className="flex flex-col">
-                    <span className="font-medium text-white">{a.patient.firstName} {a.patient.lastName}</span>
-                    <span className="text-xs text-slate-400">MRN: {a.patient.mrn}</span>
+                    <span className="font-medium text-gray-900">{a.patient.firstName} {a.patient.lastName}</span>
+                    <span className="text-xs text-gray-400">MRN: {a.patient.mrn}</span>
                 </div>
             )
         },
         {
             key: 'provider', header: 'Doctor',
-            render: (a) => <span>Dr. {a.provider.firstName} {a.provider.lastName}</span>
+            render: (a) => <span className="text-gray-700">Dr. {a.provider.firstName} {a.provider.lastName}</span>
         },
         { key: 'durationMinutes', header: 'Duration', render: (a) => `${a.durationMinutes} min` },
         {
@@ -123,7 +123,7 @@ export default function AppointmentsPage() {
                 a.status === 'SCHEDULED' ? (
                     <button
                         onClick={() => handleCancel(a.id)}
-                        className="px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 transition-colors"
+                        className="px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors"
                     >
                         Cancel
                     </button>
@@ -136,12 +136,12 @@ export default function AppointmentsPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Appointments</h1>
-                    <p className="text-slate-400 mt-1">Schedule and manage appointments</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
+                    <p className="text-gray-500 mt-1">Schedule and manage appointments</p>
                 </div>
                 <button
                     onClick={() => setShowForm(true)}
-                    className="px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-medium text-sm hover:from-blue-500 hover:to-cyan-400 transition-all shadow-lg shadow-blue-500/20"
+                    className="px-4 py-2.5 rounded-xl bg-teal-600 text-white font-medium text-sm hover:bg-teal-500 transition-colors shadow-sm shadow-teal-200"
                 >
                     + Book Appointment
                 </button>
@@ -153,9 +153,9 @@ export default function AppointmentsPage() {
                     <button
                         key={s}
                         onClick={() => { setStatusFilter(s); setPage(1); }}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${statusFilter === s
-                            ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                            : 'text-slate-400 border border-slate-800 hover:bg-slate-800/50'
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${statusFilter === s
+                            ? 'bg-teal-50 text-teal-700 border border-teal-200'
+                            : 'text-gray-500 border border-gray-200 hover:bg-gray-50'
                             }`}
                     >
                         {s === 'ALL' ? 'All' : s.replace('_', ' ')}

@@ -23,10 +23,10 @@ interface DashboardStats {
 }
 
 const statusColors: Record<string, string> = {
-    SCHEDULED: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-    COMPLETED: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-    CANCELLED: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-    NO_SHOW: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    SCHEDULED: 'bg-blue-50 text-blue-700 border-blue-200',
+    COMPLETED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    CANCELLED: 'bg-rose-50 text-rose-700 border-rose-200',
+    NO_SHOW: 'bg-amber-50 text-amber-700 border-amber-200',
 };
 
 export default function DashboardPage() {
@@ -48,14 +48,19 @@ export default function DashboardPage() {
 
     async function loadStats() {
         try {
-            const [patientsRes, appointmentsRes, invoicesRes] = await Promise.all([
+            // Use allSettled so a 403 on one endpoint doesn't break the whole dashboard
+            const [patientsResult, appointmentsResult, invoicesResult] = await Promise.allSettled([
                 patientApi.getAll('limit=1', token!) as Promise<{ data: unknown[]; meta: { total: number } }>,
                 appointmentApi.getAll('limit=100', token!) as Promise<{ data: Array<{ status: string; appointmentDate: string; reason: string; id: string; patient: { firstName: string; lastName: string }; provider: { firstName: string; lastName: string } }>; meta: { total: number } }>,
                 invoiceApi.getAll('limit=100', token!) as Promise<{ data: Array<{ paymentStatus: string; totalCents: number }>; meta: { total: number } }>,
             ]);
 
-            const appointments = appointmentsRes.data || [];
-            const invoices = invoicesRes.data || [];
+            const patientsRes = patientsResult.status === 'fulfilled' ? patientsResult.value : null;
+            const appointmentsRes = appointmentsResult.status === 'fulfilled' ? appointmentsResult.value : null;
+            const invoicesRes = invoicesResult.status === 'fulfilled' ? invoicesResult.value : null;
+
+            const appointments = appointmentsRes?.data || [];
+            const invoices = invoicesRes?.data || [];
 
             // Count upcoming appointments (today and future)
             const now = new Date();
@@ -75,7 +80,7 @@ export default function DashboardPage() {
                 .reduce((sum, inv) => sum + inv.totalCents, 0);
 
             setStats({
-                totalPatients: patientsRes.meta?.total || 0,
+                totalPatients: patientsRes?.meta?.total || 0,
                 todayAppointments: upcomingAppointments,
                 pendingInvoices,
                 totalRevenue,
@@ -110,7 +115,7 @@ export default function DashboardPage() {
 
         const statuses = ['SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'];
         const labels = ['Scheduled', 'Completed', 'Cancelled', 'No Show'];
-        const colors = ['#3b82f6', '#10b981', '#ef4444', '#f59e0b'];
+        const colors = ['#3b82f6', '#10b981', '#f43f5e', '#f59e0b'];
         const values = statuses.map((s) => stats.appointmentsByStatus[s] || 0);
         const maxVal = Math.max(...values, 1);
 
@@ -120,7 +125,7 @@ export default function DashboardPage() {
         const gap = chartWidth / statuses.length;
 
         // Y-axis grid
-        ctx.strokeStyle = '#1e293b';
+        ctx.strokeStyle = '#f1f5f9';
         ctx.lineWidth = 1;
         for (let i = 0; i <= 4; i++) {
             const y = padding.top + (chartHeight / 4) * i;
@@ -129,7 +134,7 @@ export default function DashboardPage() {
             ctx.lineTo(width - padding.right, y);
             ctx.stroke();
 
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#94a3b8';
             ctx.font = '11px Inter, sans-serif';
             ctx.textAlign = 'right';
             ctx.fillText(
@@ -148,7 +153,7 @@ export default function DashboardPage() {
             // Bar with gradient
             const gradient = ctx.createLinearGradient(x, y, x, y + barHeight);
             gradient.addColorStop(0, colors[i]);
-            gradient.addColorStop(1, colors[i] + '40');
+            gradient.addColorStop(1, colors[i] + '60');
             ctx.fillStyle = gradient;
 
             // Rounded top
@@ -165,14 +170,14 @@ export default function DashboardPage() {
 
             // Value on top
             if (val > 0) {
-                ctx.fillStyle = '#e2e8f0';
+                ctx.fillStyle = '#1e293b';
                 ctx.font = 'bold 13px Inter, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText(String(val), x + barWidth / 2, y - 8);
             }
 
             // Label
-            ctx.fillStyle = '#94a3b8';
+            ctx.fillStyle = '#64748b';
             ctx.font = '11px Inter, sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText(labels[i], x + barWidth / 2, height - 10);
@@ -183,12 +188,12 @@ export default function DashboardPage() {
         return (
             <div className="space-y-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-                    <p className="text-slate-400 mt-1">Loading overview...</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+                    <p className="text-gray-500 mt-1">Loading overview...</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[...Array(4)].map((_, i) => (
-                        <div key={i} className="h-32 bg-slate-900/80 border border-slate-800 rounded-2xl animate-pulse" />
+                        <div key={i} className="h-32 bg-white border border-gray-100 rounded-2xl animate-pulse" />
                     ))}
                 </div>
             </div>
@@ -199,8 +204,8 @@ export default function DashboardPage() {
         <div className="space-y-8">
             {/* Header */}
             <div>
-                <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-                <p className="text-slate-400 mt-1">Hospital management overview</p>
+                <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+                <p className="text-gray-500 mt-1">Hospital management overview</p>
             </div>
 
             {/* Stat Cards */}
@@ -208,7 +213,7 @@ export default function DashboardPage() {
                 <StatCard
                     title="Total Patients"
                     value={stats?.totalPatients || 0}
-                    color="blue"
+                    color="teal"
                     icon={
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
@@ -254,26 +259,26 @@ export default function DashboardPage() {
             {/* Charts + Recent Appointments */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Chart */}
-                <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
-                    <h2 className="text-lg font-semibold text-white mb-4">Appointments by Status</h2>
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Appointments by Status</h2>
                     <canvas ref={chartRef} className="w-full" style={{ height: '220px' }} />
                 </div>
 
                 {/* Recent Appointments */}
-                <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
-                    <h2 className="text-lg font-semibold text-white mb-4">Recent Appointments</h2>
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Appointments</h2>
                     <div className="space-y-3">
                         {stats?.recentAppointments.length === 0 && (
-                            <p className="text-slate-500 text-sm">No appointments yet.</p>
+                            <p className="text-gray-400 text-sm">No appointments yet.</p>
                         )}
                         {stats?.recentAppointments.map((apt) => (
-                            <div key={apt.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-800/30 border border-slate-800/50">
+                            <div key={apt.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
                                 <div className="min-w-0">
-                                    <p className="text-sm font-medium text-white truncate">
+                                    <p className="text-sm font-medium text-gray-900 truncate">
                                         {apt.patient.firstName} {apt.patient.lastName}
                                     </p>
-                                    <p className="text-xs text-slate-400 mt-0.5">
-                                        Dr. {apt.provider.lastName} • {formatDateTime(apt.appointmentDate)}
+                                    <p className="text-xs text-gray-500 mt-0.5">
+                                        Dr. {apt.provider.lastName} &middot; {formatDateTime(apt.appointmentDate)}
                                     </p>
                                 </div>
                                 <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${statusColors[apt.status] || ''}`}>

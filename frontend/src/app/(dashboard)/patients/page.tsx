@@ -73,16 +73,16 @@ export default function PatientsPage() {
     };
 
     const columns: Column<Patient>[] = [
-        { key: 'mrn', header: 'MRN', render: (p) => <span className="font-mono text-xs text-blue-400">{p.mrn}</span> },
-        { key: 'name', header: 'Name', render: (p) => <span className="font-medium text-white">{p.firstName} {p.lastName}</span> },
+        { key: 'mrn', header: 'MRN', render: (p) => <span className="font-mono text-xs text-teal-600 bg-teal-50 px-2 py-0.5 rounded">{p.mrn}</span> },
+        { key: 'name', header: 'Name', render: (p) => <span className="font-medium text-gray-900">{p.firstName} {p.lastName}</span> },
         { key: 'dateOfBirth', header: 'DOB', render: (p) => formatDate(p.dateOfBirth) },
         {
             key: 'gender', header: 'Gender', render: (p) => {
                 const colors: Record<string, string> = {
-                    MALE: 'text-blue-400',
-                    FEMALE: 'text-pink-400',
-                    OTHER: 'text-purple-400',
-                    UNKNOWN: 'text-slate-400',
+                    MALE: 'text-blue-600',
+                    FEMALE: 'text-pink-600',
+                    OTHER: 'text-purple-600',
+                    UNKNOWN: 'text-gray-400',
                 };
                 return <span className={colors[p.gender] || ''}>{p.gender}</span>;
             }
@@ -94,7 +94,7 @@ export default function PatientsPage() {
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => setEditPatient(p)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-blue-400 hover:bg-slate-800 transition-colors"
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition-colors"
                         title="Edit"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -103,7 +103,7 @@ export default function PatientsPage() {
                     </button>
                     <button
                         onClick={() => handleDelete(p.id)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                         title="Delete"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -120,12 +120,12 @@ export default function PatientsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Patient Registry</h1>
-                    <p className="text-slate-400 mt-1">Manage patient records</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Patient Registry</h1>
+                    <p className="text-gray-500 mt-1">Manage patient records</p>
                 </div>
                 <button
                     onClick={() => setShowForm(true)}
-                    className="px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-medium text-sm hover:from-blue-500 hover:to-cyan-400 transition-all shadow-lg shadow-blue-500/20"
+                    className="px-4 py-2.5 rounded-xl bg-teal-600 text-white font-medium text-sm hover:bg-teal-500 transition-colors shadow-sm shadow-teal-200"
                 >
                     + New Patient
                 </button>
@@ -133,7 +133,7 @@ export default function PatientsPage() {
 
             {/* Search */}
             <div className="relative max-w-md">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                 </svg>
                 <input
@@ -141,7 +141,7 @@ export default function PatientsPage() {
                     placeholder="Search by name..."
                     value={search}
                     onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-slate-900 border border-slate-800 text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
                 />
             </div>
 
