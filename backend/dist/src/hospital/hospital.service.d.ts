@@ -4,18 +4,18 @@ export declare class HospitalService {
     private prisma;
     constructor(prisma: PrismaService);
     create(dto: CreateHospitalDto): Promise<{
+        id: string;
+        phone: string | null;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         branch: string | null;
         address: string | null;
         city: string | null;
         state: string | null;
         zipCode: string | null;
-        phone: string | null;
         managerName: string | null;
-        id: string;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     findAll(params: {
         page?: number;
@@ -28,18 +28,18 @@ export declare class HospitalService {
                 patients: number;
             };
         } & {
+            id: string;
+            phone: string | null;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             name: string;
             branch: string | null;
             address: string | null;
             city: string | null;
             state: string | null;
             zipCode: string | null;
-            phone: string | null;
             managerName: string | null;
-            id: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
         })[];
         meta: {
             total: number;
@@ -50,51 +50,51 @@ export declare class HospitalService {
     }>;
     findOne(id: string): Promise<({
         _count: {
+            appointments: number;
             users: number;
             patients: number;
-            appointments: number;
             invoices: number;
         };
     } & {
+        id: string;
+        phone: string | null;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         branch: string | null;
         address: string | null;
         city: string | null;
         state: string | null;
         zipCode: string | null;
-        phone: string | null;
         managerName: string | null;
-        id: string;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }) | null>;
     update(id: string, dto: UpdateHospitalDto): Promise<{
+        id: string;
+        phone: string | null;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         branch: string | null;
         address: string | null;
         city: string | null;
         state: string | null;
         zipCode: string | null;
-        phone: string | null;
         managerName: string | null;
-        id: string;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     remove(id: string): Promise<{
+        id: string;
+        phone: string | null;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         branch: string | null;
         address: string | null;
         city: string | null;
         state: string | null;
         zipCode: string | null;
-        phone: string | null;
         managerName: string | null;
-        id: string;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
 }

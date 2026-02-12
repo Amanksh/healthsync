@@ -9,11 +9,11 @@ export declare class AuthService {
         message: string;
         user: {
             id: string;
-            createdAt: Date;
             email: string;
             firstName: string;
             lastName: string;
             role: import("@prisma/client").$Enums.Role;
+            createdAt: Date;
             hospitalId: string | null;
         };
     }>;
@@ -31,11 +31,11 @@ export declare class AuthService {
     }>;
     validateUserById(userId: string): Promise<{
         id: string;
-        isActive: boolean;
         email: string;
         firstName: string;
         lastName: string;
         role: import("@prisma/client").$Enums.Role;
+        isActive: boolean;
         hospitalId: string | null;
     } | null>;
 }

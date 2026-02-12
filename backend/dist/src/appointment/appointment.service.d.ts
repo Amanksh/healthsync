@@ -74,17 +74,17 @@ export declare class AppointmentService {
     findOne(id: string, hospitalId?: string): Promise<{
         patient: {
             id: string;
+            email: string | null;
+            firstName: string;
+            lastName: string;
+            phone: string;
+            createdAt: Date;
+            updatedAt: Date;
+            hospitalId: string;
             address: string | null;
             city: string | null;
             state: string | null;
             zipCode: string | null;
-            phone: string;
-            createdAt: Date;
-            updatedAt: Date;
-            email: string | null;
-            firstName: string;
-            lastName: string;
-            hospitalId: string;
             mrn: string;
             dateOfBirth: Date;
             gender: import("@prisma/client").$Enums.Gender;
