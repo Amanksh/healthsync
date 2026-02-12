@@ -6,7 +6,7 @@ import Modal from './modal';
 interface LineItem {
     description: string;
     category: string;
-    unitPriceCents: string;
+    unitPrice: string;
     quantity: string;
 }
 
@@ -29,16 +29,16 @@ export default function InvoiceFormModal({
 }: InvoiceFormModalProps) {
     const [appointmentId, setAppointmentId] = useState('');
     const [taxRate, setTaxRate] = useState('18');
-    const [discountCents, setDiscountCents] = useState('0');
+    const [discount, setDiscount] = useState('0');
     const [notes, setNotes] = useState('');
     const [items, setItems] = useState<LineItem[]>([
-        { description: '', category: 'CONSULTATION', unitPriceCents: '', quantity: '1' },
+        { description: '', category: 'CONSULTATION', unitPrice: '', quantity: '1' },
     ]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     const addItem = () => {
-        setItems([...items, { description: '', category: 'OTHER', unitPriceCents: '', quantity: '1' }]);
+        setItems([...items, { description: '', category: 'OTHER', unitPrice: '', quantity: '1' }]);
     };
 
     const removeItem = (index: number) => {
@@ -51,15 +51,15 @@ export default function InvoiceFormModal({
         setItems(updated);
     };
 
-    const subtotalCents = items.reduce((sum, item) => {
-        const price = parseInt(item.unitPriceCents) || 0;
+    const subtotal = items.reduce((sum, item) => {
+        const price = parseInt(item.unitPrice) || 0;
         const qty = parseInt(item.quantity) || 0;
         return sum + price * qty;
     }, 0);
 
-    const taxAmount = Math.round(subtotalCents * (parseFloat(taxRate) / 100));
-    const discount = parseInt(discountCents) || 0;
-    const total = subtotalCents + taxAmount - discount;
+    const taxAmount = Math.round(subtotal * (parseFloat(taxRate) / 100));
+    const discountAmount = parseInt(discount) || 0;
+    const total = subtotal + taxAmount - discountAmount;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -77,18 +77,14 @@ export default function InvoiceFormModal({
             await onSubmit({
                 appointmentId,
                 patientId: selectedApt.patient.id,
-                subtotalCents,
                 taxRate: parseFloat(taxRate) / 100,
-                taxAmountCents: taxAmount,
-                discountCents: discount,
-                totalCents: total,
+                discountCents: discountAmount,
                 notes: notes || undefined,
                 items: items.map((item) => ({
                     description: item.description,
                     category: item.category,
-                    unitPriceCents: parseInt(item.unitPriceCents) || 0,
+                    unitPriceCents: parseInt(item.unitPrice) || 0,
                     quantity: parseInt(item.quantity) || 1,
-                    totalCents: (parseInt(item.unitPriceCents) || 0) * (parseInt(item.quantity) || 1),
                 })),
             });
             onClose();
@@ -102,7 +98,8 @@ export default function InvoiceFormModal({
     const inputClass = "w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all";
     const labelClass = "block text-sm font-medium text-gray-700 mb-1.5";
 
-    const formatAmount = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+    const formatAmount = (amount: number) =>
+        new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={title} size="xl">
@@ -131,8 +128,8 @@ export default function InvoiceFormModal({
                             <input type="number" value={taxRate} onChange={(e) => setTaxRate(e.target.value)} className={inputClass} step="0.01" />
                         </div>
                         <div>
-                            <label className={labelClass}>Discount (cents)</label>
-                            <input type="number" value={discountCents} onChange={(e) => setDiscountCents(e.target.value)} className={inputClass} />
+                            <label className={labelClass}>Discount (₹)</label>
+                            <input type="number" value={discount} onChange={(e) => setDiscount(e.target.value)} className={inputClass} />
                         </div>
                     </div>
                 </div>
@@ -167,12 +164,12 @@ export default function InvoiceFormModal({
                                     </select>
                                 </div>
                                 <div className="col-span-2">
-                                    {i === 0 && <label className="block text-xs text-gray-400 mb-1">Price (cents)</label>}
+                                    {i === 0 && <label className="block text-xs text-gray-400 mb-1">Price (₹)</label>}
                                     <input
                                         type="number"
                                         required
-                                        value={item.unitPriceCents}
-                                        onChange={(e) => updateItem(i, 'unitPriceCents', e.target.value)}
+                                        value={item.unitPrice}
+                                        onChange={(e) => updateItem(i, 'unitPrice', e.target.value)}
                                         className={inputClass}
                                         placeholder="0"
                                     />
@@ -209,14 +206,14 @@ export default function InvoiceFormModal({
                 {/* Totals */}
                 <div className="bg-gray-50 rounded-xl p-4 space-y-2 border border-gray-100">
                     <div className="flex justify-between text-sm text-gray-500">
-                        <span>Subtotal</span><span>{formatAmount(subtotalCents)}</span>
+                        <span>Subtotal</span><span>{formatAmount(subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-sm text-gray-500">
                         <span>Tax ({taxRate}%)</span><span>{formatAmount(taxAmount)}</span>
                     </div>
-                    {discount > 0 && (
+                    {discountAmount > 0 && (
                         <div className="flex justify-between text-sm text-emerald-600">
-                            <span>Discount</span><span>-{formatAmount(discount)}</span>
+                            <span>Discount</span><span>-{formatAmount(discountAmount)}</span>
                         </div>
                     )}
                     <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200">

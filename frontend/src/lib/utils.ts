@@ -6,14 +6,15 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Format cents to a display currency string.
- * Example: 10050 → "$100.50"
+ * Format an amount in whole rupees to a display currency string.
+ * Example: 1500 → "₹1,500"
  */
-export function formatCurrency(cents: number, currency = 'USD'): string {
-    const amount = cents / 100;
-    return new Intl.NumberFormat('en-US', {
+export function formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('en-IN', {
         style: 'currency',
-        currency,
+        currency: 'INR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
     }).format(amount);
 }
 

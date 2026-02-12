@@ -84,6 +84,12 @@ export default function AppointmentsPage() {
         loadAppointments();
     };
 
+    const handleComplete = async (id: string) => {
+        if (!confirm('Mark this appointment as completed?')) return;
+        await appointmentApi.update(id, { status: 'COMPLETED' }, token!);
+        loadAppointments();
+    };
+
     const handleCancel = async (id: string) => {
         if (!confirm('Cancel this appointment?')) return;
         await appointmentApi.cancel(id, token!);
@@ -121,12 +127,20 @@ export default function AppointmentsPage() {
         {
             key: 'actions', header: '', render: (a) => (
                 a.status === 'SCHEDULED' ? (
-                    <button
-                        onClick={() => handleCancel(a.id)}
-                        className="px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors"
-                    >
-                        Cancel
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => handleComplete(a.id)}
+                            className="px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-200 text-emerald-600 hover:bg-emerald-50 transition-colors"
+                        >
+                            Complete
+                        </button>
+                        <button
+                            onClick={() => handleCancel(a.id)}
+                            className="px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 ) : null
             )
         },
