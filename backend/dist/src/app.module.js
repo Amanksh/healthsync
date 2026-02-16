@@ -18,6 +18,7 @@ const billing_module_1 = require("./billing/billing.module");
 const user_module_1 = require("./user/user.module");
 const pdf_module_1 = require("./pdf/pdf.module");
 const upload_module_1 = require("./upload/upload.module");
+const pharmacy_module_1 = require("./pharmacy/pharmacy.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -34,6 +35,7 @@ exports.AppModule = AppModule = __decorate([
             user_module_1.UserModule,
             pdf_module_1.PdfModule,
             upload_module_1.UploadModule,
+            pharmacy_module_1.PharmacyModule,
         ],
     })
 ], AppModule);

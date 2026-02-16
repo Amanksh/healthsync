@@ -168,7 +168,16 @@ export const userApi = {
     update: (id: string, data: Record<string, unknown>, token: string) =>
         apiClient.patch(`/users/${id}`, data, token),
 
-    toggleActive: (id: string, token: string) =>
-        apiClient.patch(`/users/${id}/toggle-active`, {}, token),
+    delete: (id: string, token: string) => apiClient.delete<void>(`/users/${id}`, token),
+    toggleActive: (id: string, token: string) => apiClient.patch<any>(`/users/${id}/toggle-active`, {}, token),
 };
 
+// ─── Pharmacy API ────────────────────────────────────────────────────────────
+
+export const pharmacyApi = {
+    getAllMedicines: (query: string = '', token: string) => apiClient.get<{ data: any[], meta: any }>(`/pharmacy/medicines?${query}`, token),
+    getMedicine: (id: string, token: string) => apiClient.get<any>(`/pharmacy/medicines/${id}`, token),
+    createMedicine: (data: any, token: string) => apiClient.post<any>('/pharmacy/medicines', data, token),
+    addStock: (id: string, data: any, token: string) => apiClient.post<any>(`/pharmacy/medicines/${id}/stock`, data, token),
+    getLowStock: (token: string) => apiClient.get<any[]>('/pharmacy/alerts/low-stock', token),
+};

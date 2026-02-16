@@ -9,6 +9,7 @@ import { BillingModule } from './billing/billing.module';
 import { UserModule } from './user/user.module';
 import { PdfModule } from './pdf/pdf.module';
 import { UploadModule } from './upload/upload.module';
+import { PharmacyModule } from './pharmacy/pharmacy.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { UploadModule } from './upload/upload.module';
     UserModule,
     PdfModule,
     UploadModule,
+    PharmacyModule,
   ],
 })
 export class AppModule { }
