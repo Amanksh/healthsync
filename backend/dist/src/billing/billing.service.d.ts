@@ -2,11 +2,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateInvoiceDto, UpdateInvoiceDto } from './dto';
 import { PdfService } from '../pdf/pdf.service';
 import { UploadService } from '../upload/upload.service';
+import { PharmacyService } from '../pharmacy/pharmacy.service';
 export declare class BillingService {
     private prisma;
     private pdfService;
     private uploadService;
-    constructor(prisma: PrismaService, pdfService: PdfService, uploadService: UploadService);
+    private pharmacyService;
+    constructor(prisma: PrismaService, pdfService: PdfService, uploadService: UploadService, pharmacyService: PharmacyService);
     private generateInvoiceNumber;
     create(dto: CreateInvoiceDto, hospitalId: string): Promise<{
         patient: {
@@ -27,6 +29,7 @@ export declare class BillingService {
             category: import("@prisma/client").$Enums.InvoiceItemCategory;
             unitPriceCents: number;
             quantity: number;
+            medicineId: string | null;
             invoiceId: string;
         }[];
     } & {
@@ -52,6 +55,7 @@ export declare class BillingService {
         limit?: number;
         paymentStatus?: string;
         hospitalId?: string;
+        search?: string;
     }): Promise<{
         data: ({
             patient: {
@@ -71,6 +75,7 @@ export declare class BillingService {
                 category: import("@prisma/client").$Enums.InvoiceItemCategory;
                 unitPriceCents: number;
                 quantity: number;
+                medicineId: string | null;
                 invoiceId: string;
             }[];
         } & {
@@ -146,6 +151,7 @@ export declare class BillingService {
             category: import("@prisma/client").$Enums.InvoiceItemCategory;
             unitPriceCents: number;
             quantity: number;
+            medicineId: string | null;
             invoiceId: string;
         }[];
     } & {
@@ -166,7 +172,7 @@ export declare class BillingService {
         s3Key: string | null;
         appointmentId: string;
     }>;
-    update(id: string, dto: UpdateInvoiceDto, hospitalId?: string): Promise<{
+    update(id: string, dto: UpdateInvoiceDto, hospitalId: string): Promise<{
         patient: {
             id: string;
             firstName: string;
@@ -185,6 +191,7 @@ export declare class BillingService {
             category: import("@prisma/client").$Enums.InvoiceItemCategory;
             unitPriceCents: number;
             quantity: number;
+            medicineId: string | null;
             invoiceId: string;
         }[];
     } & {

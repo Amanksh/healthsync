@@ -22,6 +22,7 @@ export declare class BillingController {
             category: import("@prisma/client").$Enums.InvoiceItemCategory;
             unitPriceCents: number;
             quantity: number;
+            medicineId: string | null;
             invoiceId: string;
         }[];
     } & {
@@ -42,7 +43,7 @@ export declare class BillingController {
         s3Key: string | null;
         appointmentId: string;
     }>;
-    findAll(page?: string, limit?: string, paymentStatus?: string, req?: any): Promise<{
+    findAll(page?: string, limit?: string, paymentStatus?: string, search?: string, req?: any): Promise<{
         data: ({
             patient: {
                 id: string;
@@ -61,6 +62,7 @@ export declare class BillingController {
                 category: import("@prisma/client").$Enums.InvoiceItemCategory;
                 unitPriceCents: number;
                 quantity: number;
+                medicineId: string | null;
                 invoiceId: string;
             }[];
         } & {
@@ -136,6 +138,7 @@ export declare class BillingController {
             category: import("@prisma/client").$Enums.InvoiceItemCategory;
             unitPriceCents: number;
             quantity: number;
+            medicineId: string | null;
             invoiceId: string;
         }[];
     } & {
@@ -175,6 +178,7 @@ export declare class BillingController {
             category: import("@prisma/client").$Enums.InvoiceItemCategory;
             unitPriceCents: number;
             quantity: number;
+            medicineId: string | null;
             invoiceId: string;
         }[];
     } & {

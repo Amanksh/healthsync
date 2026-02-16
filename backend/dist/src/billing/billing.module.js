@@ -12,12 +12,13 @@ const billing_controller_1 = require("./billing.controller");
 const billing_service_1 = require("./billing.service");
 const pdf_module_1 = require("../pdf/pdf.module");
 const upload_module_1 = require("../upload/upload.module");
+const pharmacy_module_1 = require("../pharmacy/pharmacy.module");
 let BillingModule = class BillingModule {
 };
 exports.BillingModule = BillingModule;
 exports.BillingModule = BillingModule = __decorate([
     (0, common_1.Module)({
-        imports: [pdf_module_1.PdfModule, upload_module_1.UploadModule],
+        imports: [pdf_module_1.PdfModule, upload_module_1.UploadModule, pharmacy_module_1.PharmacyModule],
         controllers: [billing_controller_1.BillingController],
         providers: [billing_service_1.BillingService],
     })

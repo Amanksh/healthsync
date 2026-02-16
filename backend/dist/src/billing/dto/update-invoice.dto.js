@@ -11,10 +11,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateInvoiceDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 const client_1 = require("@prisma/client");
 class UpdateInvoiceDto {
     paymentStatus;
     notes;
+    items;
+    taxRate;
+    discountCents;
 }
 exports.UpdateInvoiceDto = UpdateInvoiceDto;
 __decorate([
@@ -27,4 +31,53 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateInvoiceDto.prototype, "notes", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => InvoiceItemDto),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], UpdateInvoiceDto.prototype, "items", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], UpdateInvoiceDto.prototype, "taxRate", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], UpdateInvoiceDto.prototype, "discountCents", void 0);
+class InvoiceItemDto {
+    description;
+    category;
+    unitPriceCents;
+    quantity;
+    medicineId;
+}
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], InvoiceItemDto.prototype, "description", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], InvoiceItemDto.prototype, "category", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], InvoiceItemDto.prototype, "unitPriceCents", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    __metadata("design:type", Number)
+], InvoiceItemDto.prototype, "quantity", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], InvoiceItemDto.prototype, "medicineId", void 0);
 //# sourceMappingURL=update-invoice.dto.js.map

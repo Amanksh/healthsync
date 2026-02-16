@@ -17,6 +17,7 @@ enum Role {
   ADMIN
   DOCTOR
   RECEPTIONIST
+  PHARMACIST
 }
 
 enum Gender {
@@ -213,6 +214,10 @@ model InvoiceItem {
   invoiceId String  @map("invoice_id") @db.Uuid
   invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
+  // Optional link to Medicine (if this item is a medicine)
+  medicineId String?   @map("medicine_id") @db.Uuid
+  medicine   Medicine? @relation(fields: [medicineId], references: [id])
+
   @@map("invoice_items")
 }
 
@@ -237,6 +242,7 @@ model Medicine {
   hospital    Hospital @relation(fields: [hospitalId], references: [id])
 
   batches     MedicineBatch[]
+  invoiceItems InvoiceItem[]
 
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")

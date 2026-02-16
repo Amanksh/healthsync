@@ -28,29 +28,31 @@ export class BillingController {
     }
 
     @Get()
-    @Roles(Role.ADMIN, Role.RECEPTIONIST)
+    @Roles(Role.ADMIN, Role.RECEPTIONIST, Role.PHARMACIST)
     findAll(
         @Query('page') page?: string,
         @Query('limit') limit?: string,
         @Query('paymentStatus') paymentStatus?: string,
+        @Query('search') search?: string,
         @Request() req?: any,
     ) {
         return this.billingService.findAll({
             page: page ? parseInt(page, 10) : undefined,
             limit: limit ? parseInt(limit, 10) : undefined,
             paymentStatus,
+            search,
             hospitalId: req?.user?.hospitalId,
         });
     }
 
     @Get(':id')
-    @Roles(Role.ADMIN, Role.RECEPTIONIST)
+    @Roles(Role.ADMIN, Role.RECEPTIONIST, Role.PHARMACIST)
     findOne(@Param('id', ParseUUIDPipe) id: string, @Request() req: any) {
         return this.billingService.findOne(id, req.user.hospitalId);
     }
 
     @Patch(':id')
-    @Roles(Role.ADMIN)
+    @Roles(Role.ADMIN, Role.PHARMACIST)
     update(
         @Param('id', ParseUUIDPipe) id: string,
         @Body() dto: UpdateInvoiceDto,

@@ -53,10 +53,10 @@ export declare class PharmacyService {
             updatedAt: Date;
             hospitalId: string;
             quantity: number;
+            medicineId: string;
             batchNumber: string;
             expiryDate: Date;
             costPriceCents: number;
-            medicineId: string;
         }[];
     } & {
         id: string;
@@ -80,10 +80,10 @@ export declare class PharmacyService {
             updatedAt: Date;
             hospitalId: string;
             quantity: number;
+            medicineId: string;
             batchNumber: string;
             expiryDate: Date;
             costPriceCents: number;
-            medicineId: string;
         };
         medicine: {
             id: string;
@@ -116,4 +116,9 @@ export declare class PharmacyService {
         minStock: number;
         totalStock: number;
     }[]>;
+    deductStock(id: string, quantity: number, hospitalId: string): Promise<{
+        success: boolean;
+        deducted: number;
+        remainingStock: number;
+    }>;
 }

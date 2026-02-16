@@ -131,4 +131,54 @@ export class PharmacyService {
             orderBy: { totalStock: 'asc' },
         });
     }
+
+    /**
+     * Deducts stock from a medicine using FIFO (First-In-First-Out) logic.
+     * Consumes oldest batches first.
+     */
+    async deductStock(id: string, quantity: number, hospitalId: string) {
+        return this.prisma.$transaction(async (tx) => {
+            const medicine = await tx.medicine.findUnique({
+                where: { id },
+                include: {
+                    batches: {
+                        where: { quantity: { gt: 0 } },
+                        orderBy: { expiryDate: 'asc' }, // FIFO: Oldest expiry first
+                    },
+                },
+            });
+
+            if (!medicine) {
+                throw new NotFoundException(`Medicine not found`);
+            }
+
+            if (medicine.totalStock < quantity) {
+                throw new BadRequestException(`Insufficient stock. Available: ${medicine.totalStock}, Requested: ${quantity}`);
+            }
+
+            let remainingToDeduct = quantity;
+
+            // Iterate through batches and deduct
+            for (const batch of medicine.batches) {
+                if (remainingToDeduct <= 0) break;
+
+                const deductAmount = Math.min(batch.quantity, remainingToDeduct);
+
+                await tx.medicineBatch.update({
+                    where: { id: batch.id },
+                    data: { quantity: { decrement: deductAmount } },
+                });
+
+                remainingToDeduct -= deductAmount;
+            }
+
+            // Update total stock on Medicine model
+            await tx.medicine.update({
+                where: { id },
+                data: { totalStock: { decrement: quantity } },
+            });
+
+            return { success: true, deducted: quantity, remainingStock: medicine.totalStock - quantity };
+        });
+    }
 }

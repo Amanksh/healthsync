@@ -15,14 +15,17 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const crypto_1 = require("crypto");
 const pdf_service_1 = require("../pdf/pdf.service");
 const upload_service_1 = require("../upload/upload.service");
+const pharmacy_service_1 = require("../pharmacy/pharmacy.service");
 let BillingService = class BillingService {
     prisma;
     pdfService;
     uploadService;
-    constructor(prisma, pdfService, uploadService) {
+    pharmacyService;
+    constructor(prisma, pdfService, uploadService, pharmacyService) {
         this.prisma = prisma;
         this.pdfService = pdfService;
         this.uploadService = uploadService;
+        this.pharmacyService = pharmacyService;
     }
     generateInvoiceNumber() {
         const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -146,13 +149,21 @@ let BillingService = class BillingService {
         }
     }
     async findAll(params) {
-        const { page = 1, limit = 20, paymentStatus, hospitalId } = params;
+        const { page = 1, limit = 20, paymentStatus, hospitalId, search } = params;
         const skip = (page - 1) * limit;
         const where = {};
         if (hospitalId)
             where.hospitalId = hospitalId;
         if (paymentStatus)
             where.paymentStatus = paymentStatus;
+        if (search) {
+            where.OR = [
+                { invoiceNumber: { contains: search, mode: 'insensitive' } },
+                { patient: { firstName: { contains: search, mode: 'insensitive' } } },
+                { patient: { lastName: { contains: search, mode: 'insensitive' } } },
+                { patient: { mrn: { contains: search, mode: 'insensitive' } } },
+            ];
+        }
         const [invoices, total] = await Promise.all([
             this.prisma.invoice.findMany({
                 where,
@@ -205,10 +216,45 @@ let BillingService = class BillingService {
         return invoice;
     }
     async update(id, dto, hospitalId) {
-        await this.findOne(id, hospitalId);
-        const updatedInvoice = await this.prisma.invoice.update({
+        const existingInvoice = await this.findOne(id, hospitalId);
+        let additionalItems = [];
+        let additionalSubtotal = 0;
+        if (dto.items && dto.items.length > 0) {
+            for (const item of dto.items) {
+                if (item.medicineId) {
+                    await this.pharmacyService.deductStock(item.medicineId, item.quantity, hospitalId);
+                }
+                const totalCents = item.unitPriceCents * item.quantity;
+                additionalItems.push({
+                    description: item.description,
+                    category: item.category || 'MEDICINE',
+                    unitPriceCents: item.unitPriceCents,
+                    quantity: item.quantity,
+                    totalCents,
+                    medicineId: item.medicineId,
+                });
+                additionalSubtotal += totalCents;
+            }
+        }
+        const newSubtotal = existingInvoice.subtotalCents + additionalSubtotal;
+        const taxRate = dto.taxRate !== undefined ? dto.taxRate : Number(existingInvoice.taxRate);
+        const taxAmountCents = Math.round(newSubtotal * taxRate);
+        const discountCents = dto.discountCents !== undefined ? dto.discountCents : existingInvoice.discountCents;
+        const totalCents = newSubtotal + taxAmountCents - discountCents;
+        const result = await this.prisma.invoice.update({
             where: { id },
-            data: dto,
+            data: {
+                paymentStatus: dto.paymentStatus,
+                notes: dto.notes,
+                subtotalCents: newSubtotal,
+                taxRate,
+                taxAmountCents,
+                totalCents,
+                discountCents,
+                items: {
+                    create: additionalItems,
+                },
+            },
             include: {
                 items: true,
                 patient: {
@@ -222,39 +268,39 @@ let BillingService = class BillingService {
         });
         try {
             const pdfData = {
-                invoiceNumber: updatedInvoice.invoiceNumber,
-                date: updatedInvoice.createdAt.toLocaleDateString(),
-                paymentStatus: updatedInvoice.paymentStatus,
-                hospitalName: updatedInvoice.hospital.name,
-                hospitalAddress: updatedInvoice.hospital.address,
-                hospitalCity: updatedInvoice.hospital.city,
-                hospitalState: updatedInvoice.hospital.state,
-                hospitalZip: updatedInvoice.hospital.zipCode,
-                hospitalPhone: updatedInvoice.hospital.phone,
-                patientName: `${updatedInvoice.patient.firstName} ${updatedInvoice.patient.lastName}`,
-                patientAddress: updatedInvoice.patient.address,
-                patientCity: updatedInvoice.patient.city,
-                patientState: updatedInvoice.patient.state,
-                patientZip: updatedInvoice.patient.zipCode,
-                items: updatedInvoice.items.map(item => ({
+                invoiceNumber: result.invoiceNumber,
+                date: result.createdAt.toLocaleDateString(),
+                paymentStatus: result.paymentStatus,
+                hospitalName: result.hospital.name,
+                hospitalAddress: result.hospital.address,
+                hospitalCity: result.hospital.city,
+                hospitalState: result.hospital.state,
+                hospitalZip: result.hospital.zipCode,
+                hospitalPhone: result.hospital.phone,
+                patientName: `${result.patient.firstName} ${result.patient.lastName}`,
+                patientAddress: result.patient.address,
+                patientCity: result.patient.city,
+                patientState: result.patient.state,
+                patientZip: result.patient.zipCode,
+                items: result.items.map(item => ({
                     description: item.description,
                     category: item.category,
                     unitPrice: (item.unitPriceCents / 100).toFixed(2),
                     quantity: item.quantity,
                     total: (item.totalCents / 100).toFixed(2),
                 })),
-                subtotal: (updatedInvoice.subtotalCents / 100).toFixed(2),
-                taxRate: (Number(updatedInvoice.taxRate) * 100).toFixed(2),
-                taxAmount: (updatedInvoice.taxAmountCents / 100).toFixed(2),
-                discount: (updatedInvoice.discountCents / 100).toFixed(2),
-                totalAmount: (updatedInvoice.totalCents / 100).toFixed(2),
-                notes: updatedInvoice.notes,
+                subtotal: (result.subtotalCents / 100).toFixed(2),
+                taxRate: (Number(result.taxRate) * 100).toFixed(2),
+                taxAmount: (result.taxAmountCents / 100).toFixed(2),
+                discount: (result.discountCents / 100).toFixed(2),
+                totalAmount: (result.totalCents / 100).toFixed(2),
+                notes: result.notes,
             };
             const pdfBuffer = await this.pdfService.generateInvoicePdf(pdfData);
-            const s3Key = `invoices/${hospitalId || updatedInvoice.hospitalId}/${updatedInvoice.id}.pdf`;
+            const s3Key = `invoices/${hospitalId}/${result.id}.pdf`;
             const pdfUrl = await this.uploadService.uploadFile(s3Key, pdfBuffer, 'application/pdf');
             return this.prisma.invoice.update({
-                where: { id: updatedInvoice.id },
+                where: { id: result.id },
                 data: { pdfUrl, s3Key },
                 include: {
                     items: true,
@@ -269,7 +315,7 @@ let BillingService = class BillingService {
         }
         catch (error) {
             console.error('Error regenerating/uploading PDF:', error);
-            return updatedInvoice;
+            return result;
         }
     }
 };
@@ -278,6 +324,7 @@ exports.BillingService = BillingService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         pdf_service_1.PdfService,
-        upload_service_1.UploadService])
+        upload_service_1.UploadService,
+        pharmacy_service_1.PharmacyService])
 ], BillingService);
 //# sourceMappingURL=billing.service.js.map

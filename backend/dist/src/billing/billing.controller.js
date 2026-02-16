@@ -27,11 +27,12 @@ let BillingController = class BillingController {
     create(dto, req) {
         return this.billingService.create(dto, req.user.hospitalId);
     }
-    findAll(page, limit, paymentStatus, req) {
+    findAll(page, limit, paymentStatus, search, req) {
         return this.billingService.findAll({
             page: page ? parseInt(page, 10) : undefined,
             limit: limit ? parseInt(limit, 10) : undefined,
             paymentStatus,
+            search,
             hospitalId: req?.user?.hospitalId,
         });
     }
@@ -54,18 +55,19 @@ __decorate([
 ], BillingController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, common_2.Roles)(client_1.Role.ADMIN, client_1.Role.RECEPTIONIST),
+    (0, common_2.Roles)(client_1.Role.ADMIN, client_1.Role.RECEPTIONIST, client_1.Role.PHARMACIST),
     __param(0, (0, common_1.Query)('page')),
     __param(1, (0, common_1.Query)('limit')),
     __param(2, (0, common_1.Query)('paymentStatus')),
-    __param(3, (0, common_1.Request)()),
+    __param(3, (0, common_1.Query)('search')),
+    __param(4, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, Object]),
+    __metadata("design:paramtypes", [String, String, String, String, Object]),
     __metadata("design:returntype", void 0)
 ], BillingController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, common_2.Roles)(client_1.Role.ADMIN, client_1.Role.RECEPTIONIST),
+    (0, common_2.Roles)(client_1.Role.ADMIN, client_1.Role.RECEPTIONIST, client_1.Role.PHARMACIST),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -74,7 +76,7 @@ __decorate([
 ], BillingController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
-    (0, common_2.Roles)(client_1.Role.ADMIN),
+    (0, common_2.Roles)(client_1.Role.ADMIN, client_1.Role.PHARMACIST),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),

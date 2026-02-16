@@ -114,6 +114,41 @@ let PharmacyService = class PharmacyService {
             orderBy: { totalStock: 'asc' },
         });
     }
+    async deductStock(id, quantity, hospitalId) {
+        return this.prisma.$transaction(async (tx) => {
+            const medicine = await tx.medicine.findUnique({
+                where: { id },
+                include: {
+                    batches: {
+                        where: { quantity: { gt: 0 } },
+                        orderBy: { expiryDate: 'asc' },
+                    },
+                },
+            });
+            if (!medicine) {
+                throw new common_1.NotFoundException(`Medicine not found`);
+            }
+            if (medicine.totalStock < quantity) {
+                throw new common_1.BadRequestException(`Insufficient stock. Available: ${medicine.totalStock}, Requested: ${quantity}`);
+            }
+            let remainingToDeduct = quantity;
+            for (const batch of medicine.batches) {
+                if (remainingToDeduct <= 0)
+                    break;
+                const deductAmount = Math.min(batch.quantity, remainingToDeduct);
+                await tx.medicineBatch.update({
+                    where: { id: batch.id },
+                    data: { quantity: { decrement: deductAmount } },
+                });
+                remainingToDeduct -= deductAmount;
+            }
+            await tx.medicine.update({
+                where: { id },
+                data: { totalStock: { decrement: quantity } },
+            });
+            return { success: true, deducted: quantity, remainingStock: medicine.totalStock - quantity };
+        });
+    }
 };
 exports.PharmacyService = PharmacyService;
 exports.PharmacyService = PharmacyService = __decorate([

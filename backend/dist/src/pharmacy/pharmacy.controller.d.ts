@@ -63,10 +63,10 @@ export declare class PharmacyController {
             updatedAt: Date;
             hospitalId: string;
             quantity: number;
+            medicineId: string;
             batchNumber: string;
             expiryDate: Date;
             costPriceCents: number;
-            medicineId: string;
         }[];
     } & {
         id: string;
@@ -90,10 +90,10 @@ export declare class PharmacyController {
             updatedAt: Date;
             hospitalId: string;
             quantity: number;
+            medicineId: string;
             batchNumber: string;
             expiryDate: Date;
             costPriceCents: number;
-            medicineId: string;
         };
         medicine: {
             id: string;

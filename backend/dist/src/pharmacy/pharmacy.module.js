@@ -16,7 +16,8 @@ exports.PharmacyModule = PharmacyModule;
 exports.PharmacyModule = PharmacyModule = __decorate([
     (0, common_1.Module)({
         providers: [pharmacy_service_1.PharmacyService],
-        controllers: [pharmacy_controller_1.PharmacyController]
+        controllers: [pharmacy_controller_1.PharmacyController],
+        exports: [pharmacy_service_1.PharmacyService],
     })
 ], PharmacyModule);
 //# sourceMappingURL=pharmacy.module.js.map

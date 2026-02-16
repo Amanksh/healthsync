@@ -9,6 +9,7 @@ import { randomBytes } from 'crypto';
 
 import { PdfService } from '../pdf/pdf.service';
 import { UploadService } from '../upload/upload.service';
+import { PharmacyService } from '../pharmacy/pharmacy.service';
 
 @Injectable()
 export class BillingService {
@@ -16,6 +17,7 @@ export class BillingService {
         private prisma: PrismaService,
         private pdfService: PdfService,
         private uploadService: UploadService,
+        private pharmacyService: PharmacyService,
     ) { }
 
     /**
@@ -163,13 +165,22 @@ export class BillingService {
         }
     }
 
-    async findAll(params: { page?: number; limit?: number; paymentStatus?: string; hospitalId?: string }) {
-        const { page = 1, limit = 20, paymentStatus, hospitalId } = params;
+    async findAll(params: { page?: number; limit?: number; paymentStatus?: string; hospitalId?: string; search?: string }) {
+        const { page = 1, limit = 20, paymentStatus, hospitalId, search } = params;
         const skip = (page - 1) * limit;
 
         const where: any = {};
         if (hospitalId) where.hospitalId = hospitalId;
         if (paymentStatus) where.paymentStatus = paymentStatus;
+
+        if (search) {
+            where.OR = [
+                { invoiceNumber: { contains: search, mode: 'insensitive' } },
+                { patient: { firstName: { contains: search, mode: 'insensitive' } } },
+                { patient: { lastName: { contains: search, mode: 'insensitive' } } },
+                { patient: { mrn: { contains: search, mode: 'insensitive' } } },
+            ];
+        }
 
         const [invoices, total] = await Promise.all([
             this.prisma.invoice.findMany({
@@ -227,12 +238,54 @@ export class BillingService {
         return invoice;
     }
 
-    async update(id: string, dto: UpdateInvoiceDto, hospitalId?: string) {
-        await this.findOne(id, hospitalId);
+    async update(id: string, dto: UpdateInvoiceDto, hospitalId: string) {
+        const existingInvoice = await this.findOne(id, hospitalId);
 
-        const updatedInvoice = await this.prisma.invoice.update({
+        // Calculate totals for NEW items
+        let additionalItems = [];
+        let additionalSubtotal = 0;
+
+        if (dto.items && dto.items.length > 0) {
+            for (const item of dto.items) {
+                // If it's a medicine, deduct stock
+                if (item.medicineId) {
+                    await this.pharmacyService.deductStock(item.medicineId, item.quantity, hospitalId);
+                }
+
+                const totalCents = item.unitPriceCents * item.quantity;
+                additionalItems.push({
+                    description: item.description,
+                    category: (item.category as any) || 'MEDICINE',
+                    unitPriceCents: item.unitPriceCents,
+                    quantity: item.quantity,
+                    totalCents,
+                    medicineId: item.medicineId, // Optional link
+                });
+                additionalSubtotal += totalCents;
+            }
+        }
+
+        // Recalculate invoice totals
+        const newSubtotal = existingInvoice.subtotalCents + additionalSubtotal;
+        const taxRate = dto.taxRate !== undefined ? dto.taxRate : Number(existingInvoice.taxRate);
+        const taxAmountCents = Math.round(newSubtotal * taxRate);
+        const discountCents = dto.discountCents !== undefined ? dto.discountCents : existingInvoice.discountCents;
+        const totalCents = newSubtotal + taxAmountCents - discountCents;
+
+        const result = await this.prisma.invoice.update({
             where: { id },
-            data: dto,
+            data: {
+                paymentStatus: dto.paymentStatus,
+                notes: dto.notes,
+                subtotalCents: newSubtotal,
+                taxRate,
+                taxAmountCents,
+                totalCents,
+                discountCents,
+                items: {
+                    create: additionalItems,
+                },
+            },
             include: {
                 items: true,
                 patient: {
@@ -248,41 +301,41 @@ export class BillingService {
         // Regenerate PDF
         try {
             const pdfData = {
-                invoiceNumber: updatedInvoice.invoiceNumber,
-                date: updatedInvoice.createdAt.toLocaleDateString(),
-                paymentStatus: updatedInvoice.paymentStatus,
-                hospitalName: updatedInvoice.hospital.name,
-                hospitalAddress: updatedInvoice.hospital.address,
-                hospitalCity: updatedInvoice.hospital.city,
-                hospitalState: updatedInvoice.hospital.state,
-                hospitalZip: updatedInvoice.hospital.zipCode,
-                hospitalPhone: updatedInvoice.hospital.phone,
-                patientName: `${updatedInvoice.patient.firstName} ${updatedInvoice.patient.lastName}`,
-                patientAddress: updatedInvoice.patient.address,
-                patientCity: updatedInvoice.patient.city,
-                patientState: updatedInvoice.patient.state,
-                patientZip: updatedInvoice.patient.zipCode,
-                items: updatedInvoice.items.map(item => ({
+                invoiceNumber: result.invoiceNumber,
+                date: result.createdAt.toLocaleDateString(),
+                paymentStatus: result.paymentStatus,
+                hospitalName: result.hospital.name,
+                hospitalAddress: result.hospital.address,
+                hospitalCity: result.hospital.city,
+                hospitalState: result.hospital.state,
+                hospitalZip: result.hospital.zipCode,
+                hospitalPhone: result.hospital.phone,
+                patientName: `${result.patient.firstName} ${result.patient.lastName}`,
+                patientAddress: result.patient.address,
+                patientCity: result.patient.city,
+                patientState: result.patient.state,
+                patientZip: result.patient.zipCode,
+                items: result.items.map(item => ({
                     description: item.description,
                     category: item.category,
                     unitPrice: (item.unitPriceCents / 100).toFixed(2),
                     quantity: item.quantity,
                     total: (item.totalCents / 100).toFixed(2),
                 })),
-                subtotal: (updatedInvoice.subtotalCents / 100).toFixed(2),
-                taxRate: (Number(updatedInvoice.taxRate) * 100).toFixed(2),
-                taxAmount: (updatedInvoice.taxAmountCents / 100).toFixed(2),
-                discount: (updatedInvoice.discountCents / 100).toFixed(2),
-                totalAmount: (updatedInvoice.totalCents / 100).toFixed(2),
-                notes: updatedInvoice.notes,
+                subtotal: (result.subtotalCents / 100).toFixed(2),
+                taxRate: (Number(result.taxRate) * 100).toFixed(2),
+                taxAmount: (result.taxAmountCents / 100).toFixed(2),
+                discount: (result.discountCents / 100).toFixed(2),
+                totalAmount: (result.totalCents / 100).toFixed(2),
+                notes: result.notes,
             };
 
             const pdfBuffer = await this.pdfService.generateInvoicePdf(pdfData);
-            const s3Key = `invoices/${hospitalId || updatedInvoice.hospitalId}/${updatedInvoice.id}.pdf`;
+            const s3Key = `invoices/${hospitalId}/${result.id}.pdf`;
             const pdfUrl = await this.uploadService.uploadFile(s3Key, pdfBuffer, 'application/pdf');
 
             return this.prisma.invoice.update({
-                where: { id: updatedInvoice.id },
+                where: { id: result.id },
                 data: { pdfUrl, s3Key },
                 include: {
                     items: true,
@@ -296,7 +349,7 @@ export class BillingService {
             });
         } catch (error) {
             console.error('Error regenerating/uploading PDF:', error);
-            return updatedInvoice;
+            return result;
         }
     }
 }
