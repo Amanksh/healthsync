@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { invoiceApi, pharmacyApi } from '@/lib/api-client';
 import { useAuth } from '@/lib/auth-context';
+import { formatCurrency } from '@/lib/utils';
 import DataTable from '@/components/data-table';
 import Modal from '@/components/modal';
 import { Search, Plus } from 'lucide-react';
@@ -57,7 +58,7 @@ export default function PharmacyBillingPage() {
         {
             header: 'Total',
             key: 'totalCents',
-            render: (row: Invoice) => `$${(row.totalCents / 100).toFixed(2)}`
+            render: (row: Invoice) => formatCurrency(row.totalCents / 100)
         },
         {
             header: 'Actions',
@@ -213,7 +214,7 @@ function AddMedicineToInvoiceModal({
                                 >
                                     <span className="font-medium text-gray-900">{med.name}</span>
                                     <span className="text-gray-500">
-                                        Stock: {med.totalStock} | ${(med.unitPriceCents / 100).toFixed(2)}
+                                        Stock: {med.totalStock} | {formatCurrency(med.unitPriceCents / 100)}
                                     </span>
                                 </div>
                             ))}
@@ -226,7 +227,7 @@ function AddMedicineToInvoiceModal({
                         <p className="font-medium text-teal-700">{selectedMedicine.name}</p>
                         <div className="flex justify-between text-sm text-gray-600">
                             <span>Unit Price</span>
-                            <span>${(selectedMedicine.unitPriceCents / 100).toFixed(2)}</span>
+                            <span>{formatCurrency(selectedMedicine.unitPriceCents / 100)}</span>
                         </div>
                         <div className="flex justify-between text-sm text-gray-600">
                             <span>Available Stock</span>

@@ -96,17 +96,17 @@ export default function BillingPage() {
         },
         {
             key: 'subtotalCents', header: 'Subtotal',
-            render: (inv) => formatCurrency(inv.subtotalCents),
+            render: (inv) => formatCurrency(inv.subtotalCents / 100),
             className: 'text-right',
         },
         {
             key: 'taxAmountCents', header: 'Tax',
-            render: (inv) => formatCurrency(inv.taxAmountCents),
+            render: (inv) => formatCurrency(inv.taxAmountCents / 100),
             className: 'text-right',
         },
         {
             key: 'totalCents', header: 'Total',
-            render: (inv) => <span className="font-semibold text-gray-900">{formatCurrency(inv.totalCents)}</span>,
+            render: (inv) => <span className="font-semibold text-gray-900">{formatCurrency(inv.totalCents / 100)}</span>,
             className: 'text-right',
         },
         {
