@@ -72,7 +72,7 @@ let AppointmentService = class AppointmentService {
         });
     }
     async findAll(params) {
-        const { page = 1, limit = 20, status, providerId, patientId, dateFrom, dateTo, hospitalId } = params;
+        const { page = 1, limit = 20, status, providerId, patientId, dateFrom, dateTo, hospitalId, sortBy = 'appointmentDate', sortOrder = 'desc' } = params;
         const skip = (page - 1) * limit;
         const where = {};
         if (hospitalId)
@@ -95,7 +95,7 @@ let AppointmentService = class AppointmentService {
                 where,
                 skip,
                 take: limit,
-                orderBy: { appointmentDate: 'desc' },
+                orderBy: { [sortBy]: sortOrder },
                 include: {
                     patient: {
                         select: { id: true, firstName: true, lastName: true, mrn: true },

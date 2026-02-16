@@ -6,20 +6,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BillingModule = void 0;
+exports.PdfModule = void 0;
 const common_1 = require("@nestjs/common");
-const billing_controller_1 = require("./billing.controller");
-const billing_service_1 = require("./billing.service");
-const pdf_module_1 = require("../pdf/pdf.module");
-const upload_module_1 = require("../upload/upload.module");
-let BillingModule = class BillingModule {
+const pdf_service_1 = require("./pdf.service");
+let PdfModule = class PdfModule {
 };
-exports.BillingModule = BillingModule;
-exports.BillingModule = BillingModule = __decorate([
+exports.PdfModule = PdfModule;
+exports.PdfModule = PdfModule = __decorate([
     (0, common_1.Module)({
-        imports: [pdf_module_1.PdfModule, upload_module_1.UploadModule],
-        controllers: [billing_controller_1.BillingController],
-        providers: [billing_service_1.BillingService],
+        providers: [pdf_service_1.PdfService],
+        exports: [pdf_service_1.PdfService],
     })
-], BillingModule);
-//# sourceMappingURL=billing.module.js.map
+], PdfModule);
+//# sourceMappingURL=pdf.module.js.map

@@ -37,6 +37,8 @@ export class AppointmentController {
         @Query('patientId') patientId?: string,
         @Query('dateFrom') dateFrom?: string,
         @Query('dateTo') dateTo?: string,
+        @Query('sortBy') sortBy?: string,
+        @Query('sortOrder') sortOrder?: 'asc' | 'desc',
         @Request() req?: any,
     ) {
         return this.appointmentService.findAll({
@@ -48,6 +50,8 @@ export class AppointmentController {
             dateFrom,
             dateTo,
             hospitalId: req?.user?.hospitalId,
+            sortBy,
+            sortOrder,
         });
     }
 

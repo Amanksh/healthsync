@@ -27,7 +27,7 @@ let AppointmentController = class AppointmentController {
     create(dto, req) {
         return this.appointmentService.create(dto, req.user.hospitalId);
     }
-    findAll(page, limit, status, providerId, patientId, dateFrom, dateTo, req) {
+    findAll(page, limit, status, providerId, patientId, dateFrom, dateTo, sortBy, sortOrder, req) {
         return this.appointmentService.findAll({
             page: page ? parseInt(page, 10) : undefined,
             limit: limit ? parseInt(limit, 10) : undefined,
@@ -37,6 +37,8 @@ let AppointmentController = class AppointmentController {
             dateFrom,
             dateTo,
             hospitalId: req?.user?.hospitalId,
+            sortBy,
+            sortOrder,
         });
     }
     findOne(id, req) {
@@ -69,9 +71,11 @@ __decorate([
     __param(4, (0, common_1.Query)('patientId')),
     __param(5, (0, common_1.Query)('dateFrom')),
     __param(6, (0, common_1.Query)('dateTo')),
-    __param(7, (0, common_1.Request)()),
+    __param(7, (0, common_1.Query)('sortBy')),
+    __param(8, (0, common_1.Query)('sortOrder')),
+    __param(9, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String, String, Object]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String, Object]),
     __metadata("design:returntype", void 0)
 ], AppointmentController.prototype, "findAll", null);
 __decorate([

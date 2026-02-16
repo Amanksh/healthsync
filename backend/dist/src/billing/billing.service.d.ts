@@ -1,8 +1,12 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInvoiceDto, UpdateInvoiceDto } from './dto';
+import { PdfService } from '../pdf/pdf.service';
+import { UploadService } from '../upload/upload.service';
 export declare class BillingService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private pdfService;
+    private uploadService;
+    constructor(prisma: PrismaService, pdfService: PdfService, uploadService: UploadService);
     private generateInvoiceNumber;
     create(dto: CreateInvoiceDto, hospitalId: string): Promise<{
         patient: {
@@ -39,6 +43,8 @@ export declare class BillingService {
         discountCents: number;
         totalCents: number;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
+        pdfUrl: string | null;
+        s3Key: string | null;
         appointmentId: string;
     }>;
     findAll(params: {
@@ -81,6 +87,8 @@ export declare class BillingService {
             discountCents: number;
             totalCents: number;
             paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
+            pdfUrl: string | null;
+            s3Key: string | null;
             appointmentId: string;
         })[];
         meta: {
@@ -154,6 +162,8 @@ export declare class BillingService {
         discountCents: number;
         totalCents: number;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
+        pdfUrl: string | null;
+        s3Key: string | null;
         appointmentId: string;
     }>;
     update(id: string, dto: UpdateInvoiceDto, hospitalId?: string): Promise<{
@@ -161,6 +171,12 @@ export declare class BillingService {
             id: string;
             firstName: string;
             lastName: string;
+            mrn: string;
+        };
+        appointment: {
+            id: string;
+            appointmentDate: Date;
+            status: import("@prisma/client").$Enums.AppointmentStatus;
         };
         items: {
             id: string;
@@ -185,6 +201,8 @@ export declare class BillingService {
         discountCents: number;
         totalCents: number;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
+        pdfUrl: string | null;
+        s3Key: string | null;
         appointmentId: string;
     }>;
 }

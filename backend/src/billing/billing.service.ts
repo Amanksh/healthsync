@@ -7,9 +7,16 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateInvoiceDto, UpdateInvoiceDto } from './dto';
 import { randomBytes } from 'crypto';
 
+import { PdfService } from '../pdf/pdf.service';
+import { UploadService } from '../upload/upload.service';
+
 @Injectable()
 export class BillingService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private pdfService: PdfService,
+        private uploadService: UploadService,
+    ) { }
 
     /**
      * Generate a unique invoice number.
@@ -70,7 +77,7 @@ export class BillingService {
 
         const invoiceNumber = this.generateInvoiceNumber();
 
-        return this.prisma.invoice.create({
+        const invoice = await this.prisma.invoice.create({
             data: {
                 invoiceNumber,
                 appointmentId: dto.appointmentId,
@@ -89,13 +96,71 @@ export class BillingService {
             include: {
                 items: true,
                 patient: {
-                    select: { id: true, firstName: true, lastName: true, mrn: true },
+                    select: { id: true, firstName: true, lastName: true, mrn: true, address: true, city: true, state: true, zipCode: true },
                 },
                 appointment: {
                     select: { id: true, appointmentDate: true, status: true },
                 },
+                hospital: true,
             },
         });
+
+        // Generate PDF
+        try {
+            const pdfData = {
+                invoiceNumber: invoice.invoiceNumber,
+                date: invoice.createdAt.toLocaleDateString(),
+                paymentStatus: invoice.paymentStatus,
+                hospitalName: invoice.hospital.name,
+                hospitalAddress: invoice.hospital.address,
+                hospitalCity: invoice.hospital.city,
+                hospitalState: invoice.hospital.state,
+                hospitalZip: invoice.hospital.zipCode,
+                hospitalPhone: invoice.hospital.phone,
+                patientName: `${invoice.patient.firstName} ${invoice.patient.lastName}`,
+                patientAddress: invoice.patient.address,
+                patientCity: invoice.patient.city,
+                patientState: invoice.patient.state,
+                patientZip: invoice.patient.zipCode,
+                items: invoice.items.map(item => ({
+                    description: item.description,
+                    category: item.category,
+                    unitPrice: (item.unitPriceCents / 100).toFixed(2),
+                    quantity: item.quantity,
+                    total: (item.totalCents / 100).toFixed(2),
+                })),
+                subtotal: (invoice.subtotalCents / 100).toFixed(2),
+                taxRate: (Number(invoice.taxRate) * 100).toFixed(2),
+                taxAmount: (invoice.taxAmountCents / 100).toFixed(2),
+                discount: (invoice.discountCents / 100).toFixed(2),
+                totalAmount: (invoice.totalCents / 100).toFixed(2),
+                notes: invoice.notes,
+            };
+
+            const pdfBuffer = await this.pdfService.generateInvoicePdf(pdfData);
+            const s3Key = `invoices/${hospitalId}/${invoice.id}.pdf`;
+            const pdfUrl = await this.uploadService.uploadFile(s3Key, pdfBuffer, 'application/pdf');
+
+            // Update invoice with PDF URL
+            return this.prisma.invoice.update({
+                where: { id: invoice.id },
+                data: { pdfUrl, s3Key },
+                include: {
+                    items: true,
+                    patient: {
+                        select: { id: true, firstName: true, lastName: true, mrn: true },
+                    },
+                    appointment: {
+                        select: { id: true, appointmentDate: true, status: true },
+                    },
+                },
+            });
+
+        } catch (error) {
+            console.error('Error generating/uploading PDF:', error);
+            // Return invoice even if PDF fails (can be regenerated later)
+            return invoice;
+        }
     }
 
     async findAll(params: { page?: number; limit?: number; paymentStatus?: string; hospitalId?: string }) {
@@ -165,15 +230,73 @@ export class BillingService {
     async update(id: string, dto: UpdateInvoiceDto, hospitalId?: string) {
         await this.findOne(id, hospitalId);
 
-        return this.prisma.invoice.update({
+        const updatedInvoice = await this.prisma.invoice.update({
             where: { id },
             data: dto,
             include: {
                 items: true,
                 patient: {
-                    select: { id: true, firstName: true, lastName: true },
+                    select: { id: true, firstName: true, lastName: true, mrn: true, address: true, city: true, state: true, zipCode: true },
                 },
+                appointment: {
+                    select: { id: true, appointmentDate: true, status: true },
+                },
+                hospital: true,
             },
         });
+
+        // Regenerate PDF
+        try {
+            const pdfData = {
+                invoiceNumber: updatedInvoice.invoiceNumber,
+                date: updatedInvoice.createdAt.toLocaleDateString(),
+                paymentStatus: updatedInvoice.paymentStatus,
+                hospitalName: updatedInvoice.hospital.name,
+                hospitalAddress: updatedInvoice.hospital.address,
+                hospitalCity: updatedInvoice.hospital.city,
+                hospitalState: updatedInvoice.hospital.state,
+                hospitalZip: updatedInvoice.hospital.zipCode,
+                hospitalPhone: updatedInvoice.hospital.phone,
+                patientName: `${updatedInvoice.patient.firstName} ${updatedInvoice.patient.lastName}`,
+                patientAddress: updatedInvoice.patient.address,
+                patientCity: updatedInvoice.patient.city,
+                patientState: updatedInvoice.patient.state,
+                patientZip: updatedInvoice.patient.zipCode,
+                items: updatedInvoice.items.map(item => ({
+                    description: item.description,
+                    category: item.category,
+                    unitPrice: (item.unitPriceCents / 100).toFixed(2),
+                    quantity: item.quantity,
+                    total: (item.totalCents / 100).toFixed(2),
+                })),
+                subtotal: (updatedInvoice.subtotalCents / 100).toFixed(2),
+                taxRate: (Number(updatedInvoice.taxRate) * 100).toFixed(2),
+                taxAmount: (updatedInvoice.taxAmountCents / 100).toFixed(2),
+                discount: (updatedInvoice.discountCents / 100).toFixed(2),
+                totalAmount: (updatedInvoice.totalCents / 100).toFixed(2),
+                notes: updatedInvoice.notes,
+            };
+
+            const pdfBuffer = await this.pdfService.generateInvoicePdf(pdfData);
+            const s3Key = `invoices/${hospitalId || updatedInvoice.hospitalId}/${updatedInvoice.id}.pdf`;
+            const pdfUrl = await this.uploadService.uploadFile(s3Key, pdfBuffer, 'application/pdf');
+
+            return this.prisma.invoice.update({
+                where: { id: updatedInvoice.id },
+                data: { pdfUrl, s3Key },
+                include: {
+                    items: true,
+                    patient: {
+                        select: { id: true, firstName: true, lastName: true, mrn: true },
+                    },
+                    appointment: {
+                        select: { id: true, appointmentDate: true, status: true },
+                    },
+                },
+            });
+        } catch (error) {
+            console.error('Error regenerating/uploading PDF:', error);
+            return updatedInvoice;
+        }
     }
 }

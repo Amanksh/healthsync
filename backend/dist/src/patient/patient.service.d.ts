@@ -93,6 +93,8 @@ export declare class PatientService {
             discountCents: number;
             totalCents: number;
             paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
+            pdfUrl: string | null;
+            s3Key: string | null;
             appointmentId: string;
         }[];
     } & {

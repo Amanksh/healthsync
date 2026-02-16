@@ -78,12 +78,12 @@ export default function InvoiceFormModal({
                 appointmentId,
                 patientId: selectedApt.patient.id,
                 taxRate: parseFloat(taxRate) / 100,
-                discountCents: discountAmount,
+                discountCents: discountAmount * 100, // Convert to cents
                 notes: notes || undefined,
                 items: items.map((item) => ({
                     description: item.description,
                     category: item.category,
-                    unitPriceCents: parseInt(item.unitPrice) || 0,
+                    unitPriceCents: (parseInt(item.unitPrice) || 0) * 100, // Convert to cents
                     quantity: parseInt(item.quantity) || 1,
                 })),
             });

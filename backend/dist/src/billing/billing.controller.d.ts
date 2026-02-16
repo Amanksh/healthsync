@@ -38,6 +38,8 @@ export declare class BillingController {
         discountCents: number;
         totalCents: number;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
+        pdfUrl: string | null;
+        s3Key: string | null;
         appointmentId: string;
     }>;
     findAll(page?: string, limit?: string, paymentStatus?: string, req?: any): Promise<{
@@ -75,6 +77,8 @@ export declare class BillingController {
             discountCents: number;
             totalCents: number;
             paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
+            pdfUrl: string | null;
+            s3Key: string | null;
             appointmentId: string;
         })[];
         meta: {
@@ -148,6 +152,8 @@ export declare class BillingController {
         discountCents: number;
         totalCents: number;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
+        pdfUrl: string | null;
+        s3Key: string | null;
         appointmentId: string;
     }>;
     update(id: string, dto: UpdateInvoiceDto, req: any): Promise<{
@@ -155,6 +161,12 @@ export declare class BillingController {
             id: string;
             firstName: string;
             lastName: string;
+            mrn: string;
+        };
+        appointment: {
+            id: string;
+            appointmentDate: Date;
+            status: import("@prisma/client").$Enums.AppointmentStatus;
         };
         items: {
             id: string;
@@ -179,6 +191,8 @@ export declare class BillingController {
         discountCents: number;
         totalCents: number;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
+        pdfUrl: string | null;
+        s3Key: string | null;
         appointmentId: string;
     }>;
 }

@@ -88,8 +88,10 @@ export class AppointmentService {
         dateFrom?: string;
         dateTo?: string;
         hospitalId?: string;
+        sortBy?: string;
+        sortOrder?: 'asc' | 'desc';
     }) {
-        const { page = 1, limit = 20, status, providerId, patientId, dateFrom, dateTo, hospitalId } = params;
+        const { page = 1, limit = 20, status, providerId, patientId, dateFrom, dateTo, hospitalId, sortBy = 'appointmentDate', sortOrder = 'desc' } = params;
         const skip = (page - 1) * limit;
 
         const where: any = {};
@@ -108,7 +110,7 @@ export class AppointmentService {
                 where,
                 skip,
                 take: limit,
-                orderBy: { appointmentDate: 'desc' },
+                orderBy: { [sortBy]: sortOrder },
                 include: {
                     patient: {
                         select: { id: true, firstName: true, lastName: true, mrn: true },

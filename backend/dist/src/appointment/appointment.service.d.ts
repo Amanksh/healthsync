@@ -38,6 +38,8 @@ export declare class AppointmentService {
         dateFrom?: string;
         dateTo?: string;
         hospitalId?: string;
+        sortBy?: string;
+        sortOrder?: 'asc' | 'desc';
     }): Promise<{
         data: ({
             patient: {
@@ -113,6 +115,8 @@ export declare class AppointmentService {
             discountCents: number;
             totalCents: number;
             paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
+            pdfUrl: string | null;
+            s3Key: string | null;
             appointmentId: string;
         } | null;
     } & {

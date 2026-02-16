@@ -29,7 +29,7 @@ export declare class AppointmentController {
         patientId: string;
         providerId: string;
     }>;
-    findAll(page?: string, limit?: string, status?: AppointmentStatus, providerId?: string, patientId?: string, dateFrom?: string, dateTo?: string, req?: any): Promise<{
+    findAll(page?: string, limit?: string, status?: AppointmentStatus, providerId?: string, patientId?: string, dateFrom?: string, dateTo?: string, sortBy?: string, sortOrder?: 'asc' | 'desc', req?: any): Promise<{
         data: ({
             patient: {
                 id: string;
@@ -104,6 +104,8 @@ export declare class AppointmentController {
             discountCents: number;
             totalCents: number;
             paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
+            pdfUrl: string | null;
+            s3Key: string | null;
             appointmentId: string;
         } | null;
     } & {
