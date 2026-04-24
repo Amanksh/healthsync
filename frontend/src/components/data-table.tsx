@@ -87,7 +87,9 @@ export default function DataTable<T extends { id?: string }>({
                                         <td key={`${rowKey}-${colIndex}`} className={`px-6 py-4 text-gray-600 whitespace-nowrap ${col.className || ''}`}>
                                             {col.render
                                                 ? col.render(item)
-                                                : (col.accessor ? (item[col.accessor] as React.ReactNode) : (item as any)[col.key])
+                                                : (col.accessor
+                                                    ? (item[col.accessor] as React.ReactNode)
+                                                    : ((item as Record<string, unknown>)[col.key] as React.ReactNode))
                                             }
                                         </td>
                                     ))}

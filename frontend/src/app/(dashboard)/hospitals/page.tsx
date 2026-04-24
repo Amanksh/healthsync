@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { hospitalApi } from '@/lib/api-client';
 import DataTable, { Column } from '@/components/data-table';
@@ -31,9 +31,25 @@ export default function HospitalsPage() {
     const [editingHospital, setEditingHospital] = useState<Hospital | null>(null);
     const [search, setSearch] = useState('');
 
-    useEffect(() => {
-        if (token) loadHospitals();
+    const loadHospitals = useCallback(async () => {
+        if (!token) return;
+        setLoading(true);
+        try {
+            const params = new URLSearchParams({ page: String(page), limit: '10' });
+            if (search) params.set('search', search);
+            const res = await hospitalApi.getAll(params.toString(), token) as { data: Hospital[]; meta: { total: number; totalPages: number } };
+            setHospitals(res.data || []);
+            setTotalPages(res.meta?.totalPages || 1);
+        } catch (err) {
+            console.error('Failed to load hospitals:', err);
+        } finally {
+            setLoading(false);
+        }
     }, [token, page, search]);
+
+    useEffect(() => {
+        loadHospitals();
+    }, [loadHospitals]);
 
     // Only SUPER_ADMIN can access this page
     if (user?.role !== 'SUPER_ADMIN') {
@@ -42,21 +58,6 @@ export default function HospitalsPage() {
                 <p className="text-gray-400 text-lg">You do not have permission to access this page.</p>
             </div>
         );
-    }
-
-    async function loadHospitals() {
-        setLoading(true);
-        try {
-            const params = new URLSearchParams({ page: String(page), limit: '10' });
-            if (search) params.set('search', search);
-            const res = await hospitalApi.getAll(params.toString(), token!) as { data: Hospital[]; meta: { total: number; totalPages: number } };
-            setHospitals(res.data || []);
-            setTotalPages(res.meta?.totalPages || 1);
-        } catch (err) {
-            console.error('Failed to load hospitals:', err);
-        } finally {
-            setLoading(false);
-        }
     }
 
     async function handleCreate(data: Record<string, unknown>) {

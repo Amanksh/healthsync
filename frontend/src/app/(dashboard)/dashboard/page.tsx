@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { patientApi, appointmentApi, invoiceApi } from '@/lib/api-client';
 import StatCard from '@/components/stat-card';
@@ -35,24 +35,14 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const chartRef = useRef<HTMLCanvasElement>(null);
 
-    useEffect(() => {
+    const loadStats = useCallback(async () => {
         if (!token) return;
-        loadStats();
-    }, [token]);
-
-    useEffect(() => {
-        if (stats && chartRef.current) {
-            drawChart();
-        }
-    }, [stats]);
-
-    async function loadStats() {
         try {
             // Use allSettled so a 403 on one endpoint doesn't break the whole dashboard
             const [patientsResult, appointmentsResult, invoicesResult] = await Promise.allSettled([
-                patientApi.getAll('limit=1', token!) as Promise<{ data: unknown[]; meta: { total: number } }>,
-                appointmentApi.getAll('limit=100', token!) as Promise<{ data: Array<{ status: string; appointmentDate: string; reason: string; id: string; patient: { firstName: string; lastName: string }; provider: { firstName: string; lastName: string } }>; meta: { total: number } }>,
-                invoiceApi.getAll('limit=100', token!) as Promise<{ data: Array<{ paymentStatus: string; totalCents: number }>; meta: { total: number } }>,
+                patientApi.getAll('limit=1', token) as Promise<{ data: unknown[]; meta: { total: number } }>,
+                appointmentApi.getAll('limit=100', token) as Promise<{ data: Array<{ status: string; appointmentDate: string; reason: string; id: string; patient: { firstName: string; lastName: string }; provider: { firstName: string; lastName: string } }>; meta: { total: number } }>,
+                invoiceApi.getAll('limit=100', token) as Promise<{ data: Array<{ paymentStatus: string; totalCents: number }>; meta: { total: number } }>,
             ]);
 
             const patientsRes = patientsResult.status === 'fulfilled' ? patientsResult.value : null;
@@ -92,9 +82,9 @@ export default function DashboardPage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [token]);
 
-    function drawChart() {
+    const drawChart = useCallback(() => {
         const canvas = chartRef.current;
         if (!canvas || !stats) return;
 
@@ -182,7 +172,17 @@ export default function DashboardPage() {
             ctx.textAlign = 'center';
             ctx.fillText(labels[i], x + barWidth / 2, height - 10);
         });
-    }
+    }, [stats]);
+
+    useEffect(() => {
+        loadStats();
+    }, [loadStats]);
+
+    useEffect(() => {
+        if (stats && chartRef.current) {
+            drawChart();
+        }
+    }, [stats, drawChart]);
 
     if (loading) {
         return (

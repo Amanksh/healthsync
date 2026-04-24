@@ -1,5 +1,71 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
+export interface PaginatedResponse<T> {
+    data: T[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+}
+
+export interface UserSummary {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    phone?: string | null;
+    isActive: boolean;
+    hospitalId?: string | null;
+}
+
+export interface Medicine {
+    id: string;
+    name: string;
+    genericName?: string | null;
+    code?: string | null;
+    description?: string | null;
+    category?: string | null;
+    manufacturer?: string | null;
+    totalStock: number;
+    minStock: number;
+    unitPriceCents: number;
+    hospitalId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface CreateMedicinePayload {
+    name: string;
+    genericName?: string;
+    category?: string;
+    manufacturer?: string;
+    code?: string;
+    minStock: number;
+    unitPriceCents: number;
+}
+
+export interface AddStockPayload {
+    batchNumber: string;
+    expiryDate: string;
+    quantity: number;
+    costPriceCents: number;
+}
+
+export interface MedicineBatch {
+    id: string;
+    medicineId: string;
+    hospitalId: string;
+    batchNumber: string;
+    expiryDate: string;
+    quantity: number;
+    costPriceCents: number;
+    createdAt: string;
+    updatedAt: string;
+}
+
 interface RequestOptions extends RequestInit {
     token?: string;
 }
@@ -79,7 +145,7 @@ export const authApi = {
     login: (data: { email: string; password: string }) =>
         apiClient.post('/auth/login', data),
 
-    register: (data: Record<string, unknown>, token: string) =>
+    register: (data: unknown, token: string) =>
         apiClient.post('/auth/register', data, token),
 };
 
@@ -92,10 +158,10 @@ export const patientApi = {
     getById: (id: string, token: string) =>
         apiClient.get(`/patients/${id}`, token),
 
-    create: (data: Record<string, unknown>, token: string) =>
+    create: (data: unknown, token: string) =>
         apiClient.post('/patients', data, token),
 
-    update: (id: string, data: Record<string, unknown>, token: string) =>
+    update: (id: string, data: unknown, token: string) =>
         apiClient.patch(`/patients/${id}`, data, token),
 
     delete: (id: string, token: string) =>
@@ -111,10 +177,10 @@ export const appointmentApi = {
     getById: (id: string, token: string) =>
         apiClient.get(`/appointments/${id}`, token),
 
-    create: (data: Record<string, unknown>, token: string) =>
+    create: (data: unknown, token: string) =>
         apiClient.post('/appointments', data, token),
 
-    update: (id: string, data: Record<string, unknown>, token: string) =>
+    update: (id: string, data: unknown, token: string) =>
         apiClient.patch(`/appointments/${id}`, data, token),
 
     cancel: (id: string, token: string) =>
@@ -130,10 +196,10 @@ export const invoiceApi = {
     getById: (id: string, token: string) =>
         apiClient.get(`/invoices/${id}`, token),
 
-    create: (data: Record<string, unknown>, token: string) =>
+    create: (data: unknown, token: string) =>
         apiClient.post('/invoices', data, token),
 
-    update: (id: string, data: Record<string, unknown>, token: string) =>
+    update: (id: string, data: unknown, token: string) =>
         apiClient.patch(`/invoices/${id}`, data, token),
 };
 
@@ -146,10 +212,10 @@ export const hospitalApi = {
     getById: (id: string, token: string) =>
         apiClient.get(`/hospitals/${id}`, token),
 
-    create: (data: Record<string, unknown>, token: string) =>
+    create: (data: unknown, token: string) =>
         apiClient.post('/hospitals', data, token),
 
-    update: (id: string, data: Record<string, unknown>, token: string) =>
+    update: (id: string, data: unknown, token: string) =>
         apiClient.patch(`/hospitals/${id}`, data, token),
 
     delete: (id: string, token: string) =>
@@ -162,22 +228,26 @@ export const userApi = {
     getAll: (params: string, token: string) =>
         apiClient.get(`/users?${params}`, token),
 
-    create: (data: Record<string, unknown>, token: string) =>
+    create: (data: unknown, token: string) =>
         apiClient.post('/users', data, token),
 
-    update: (id: string, data: Record<string, unknown>, token: string) =>
+    update: (id: string, data: unknown, token: string) =>
         apiClient.patch(`/users/${id}`, data, token),
 
     delete: (id: string, token: string) => apiClient.delete<void>(`/users/${id}`, token),
-    toggleActive: (id: string, token: string) => apiClient.patch<any>(`/users/${id}/toggle-active`, {}, token),
+    toggleActive: (id: string, token: string) => apiClient.patch<UserSummary>(`/users/${id}/toggle-active`, {}, token),
 };
 
 // ─── Pharmacy API ────────────────────────────────────────────────────────────
 
 export const pharmacyApi = {
-    getAllMedicines: (query: string = '', token: string) => apiClient.get<{ data: any[], meta: any }>(`/pharmacy/medicines?${query}`, token),
-    getMedicine: (id: string, token: string) => apiClient.get<any>(`/pharmacy/medicines/${id}`, token),
-    createMedicine: (data: any, token: string) => apiClient.post<any>('/pharmacy/medicines', data, token),
-    addStock: (id: string, data: any, token: string) => apiClient.post<any>(`/pharmacy/medicines/${id}/stock`, data, token),
-    getLowStock: (token: string) => apiClient.get<any[]>('/pharmacy/alerts/low-stock', token),
+    getAllMedicines: (query: string = '', token: string) =>
+        apiClient.get<PaginatedResponse<Medicine>>(`/pharmacy/medicines?${query}`, token),
+    getMedicine: (id: string, token: string) =>
+        apiClient.get<Medicine & { batches: MedicineBatch[] }>(`/pharmacy/medicines/${id}`, token),
+    createMedicine: (data: CreateMedicinePayload, token: string) =>
+        apiClient.post<Medicine>('/pharmacy/medicines', data, token),
+    addStock: (id: string, data: AddStockPayload, token: string) =>
+        apiClient.post<{ batch: MedicineBatch; medicine: Medicine }>(`/pharmacy/medicines/${id}/stock`, data, token),
+    getLowStock: (token: string) => apiClient.get<Medicine[]>('/pharmacy/alerts/low-stock', token),
 };

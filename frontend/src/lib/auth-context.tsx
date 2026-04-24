@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { authApi } from './api-client';
 
 interface User {
@@ -8,7 +8,7 @@ interface User {
     email: string;
     firstName: string;
     lastName: string;
-    role: 'SUPER_ADMIN' | 'ADMIN' | 'DOCTOR' | 'RECEPTIONIST';
+    role: 'SUPER_ADMIN' | 'ADMIN' | 'DOCTOR' | 'RECEPTIONIST' | 'PHARMACIST';
     hospitalId: string | null;
     hospitalName: string | null;
 }
@@ -24,20 +24,32 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
-    const [token, setToken] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+function getSavedAuth() {
+    if (typeof window === 'undefined') {
+        return { savedToken: null, savedUser: null };
+    }
 
-    useEffect(() => {
-        const savedToken = localStorage.getItem('hms_token');
-        const savedUser = localStorage.getItem('hms_user');
-        if (savedToken && savedUser) {
-            setToken(savedToken);
-            setUser(JSON.parse(savedUser));
-        }
-        setIsLoading(false);
-    }, []);
+    const savedToken = localStorage.getItem('hms_token');
+    const savedUserJson = localStorage.getItem('hms_user');
+
+    if (!savedToken || !savedUserJson) {
+        return { savedToken: null, savedUser: null };
+    }
+
+    try {
+        return { savedToken, savedUser: JSON.parse(savedUserJson) as User };
+    } catch {
+        localStorage.removeItem('hms_token');
+        localStorage.removeItem('hms_user');
+        return { savedToken: null, savedUser: null };
+    }
+}
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+    const [{ savedToken, savedUser }] = useState(getSavedAuth);
+    const [user, setUser] = useState<User | null>(savedUser);
+    const [token, setToken] = useState<string | null>(savedToken);
+    const isLoading = false;
 
     const login = useCallback(async (email: string, password: string) => {
         const response = await authApi.login({ email, password }) as {

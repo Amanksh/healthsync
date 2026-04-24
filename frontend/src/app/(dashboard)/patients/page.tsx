@@ -24,6 +24,21 @@ interface Patient {
     allergies?: string;
 }
 
+interface PatientFormData {
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
+    gender: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    bloodGroup: string;
+    allergies: string;
+}
+
 export default function PatientsPage() {
     const { token } = useAuth();
     const [patients, setPatients] = useState<Patient[]>([]);
@@ -54,12 +69,12 @@ export default function PatientsPage() {
         loadPatients();
     }, [loadPatients]);
 
-    const handleCreate = async (data: any) => {
+    const handleCreate = async (data: PatientFormData) => {
         await patientApi.create(data, token!);
         loadPatients();
     };
 
-    const handleUpdate = async (data: any) => {
+    const handleUpdate = async (data: PatientFormData) => {
         if (!editPatient) return;
         await patientApi.update(editPatient.id, data, token!);
         setEditPatient(null);

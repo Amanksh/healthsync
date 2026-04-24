@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { invoiceApi, pharmacyApi } from '@/lib/api-client';
+import { Medicine, PaginatedResponse, invoiceApi, pharmacyApi } from '@/lib/api-client';
 import { useAuth } from '@/lib/auth-context';
 import { formatCurrency } from '@/lib/utils';
 import DataTable from '@/components/data-table';
@@ -19,7 +19,17 @@ interface Invoice {
     paymentStatus: string;
     totalCents: number;
     createdAt: string;
-    items: any[];
+    items: InvoiceItem[];
+}
+
+interface InvoiceItem {
+    id: string;
+    description: string;
+    category: string;
+    unitPriceCents: number;
+    quantity: number;
+    totalCents: number;
+    medicineId?: string | null;
 }
 
 export default function PharmacyBillingPage() {
@@ -35,7 +45,7 @@ export default function PharmacyBillingPage() {
         if (!token) return;
         setLoading(true);
         try {
-            const response = await invoiceApi.getAll(`search=${searchTerm}&limit=50&paymentStatus=PENDING`, token) as any;
+            const response = await invoiceApi.getAll(`search=${searchTerm}&limit=50&paymentStatus=PENDING`, token) as PaginatedResponse<Invoice>;
             // Handle if response is { data: [...], meta: ... } or just [...]
             setInvoices(response.data || []);
         } catch (error) {
@@ -147,9 +157,9 @@ function AddMedicineToInvoiceModal({
     token: string;
     onSuccess: () => void;
 }) {
-    const [medicines, setMedicines] = useState<any[]>([]);
+    const [medicines, setMedicines] = useState<Medicine[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedMedicine, setSelectedMedicine] = useState<any | null>(null);
+    const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(null);
     const [quantity, setQuantity] = useState(1);
     const [submitting, setSubmitting] = useState(false);
 

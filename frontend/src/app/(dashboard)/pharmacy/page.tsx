@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { pharmacyApi } from '@/lib/api-client';
+import { Medicine, pharmacyApi } from '@/lib/api-client';
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
 
 export default function PharmacyDashboard() {
     const { token } = useAuth();
-    const [lowStockMedicines, setLowStockMedicines] = useState<any[]>([]);
-    const [recentMedicines, setRecentMedicines] = useState<any[]>([]);
+    const [lowStockMedicines, setLowStockMedicines] = useState<Medicine[]>([]);
+    const [recentMedicines, setRecentMedicines] = useState<Medicine[]>([]);
     const [totalMedicines, setTotalMedicines] = useState<number>(0);
     const [loading, setLoading] = useState(true);
 

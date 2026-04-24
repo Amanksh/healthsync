@@ -2,24 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { pharmacyApi } from '@/lib/api-client';
+import { Medicine, pharmacyApi } from '@/lib/api-client';
 import DataTable, { Column } from '@/components/data-table';
 import AddMedicineModal from '@/components/add-medicine-modal';
 import AddStockModal from '@/components/add-stock-modal';
 import { Plus, Search, Archive } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-
-interface Medicine {
-    id: string;
-    name: string;
-    genericName: string;
-    category: string;
-    totalStock: number;
-    minStock: number;
-    unitPriceCents: number;
-    code: string;
-    manufacturer: string;
-}
 
 export default function PharmacyInventoryPage() {
     const { token } = useAuth();
