@@ -37,7 +37,12 @@ export default function UsersPage() {
     const canAccess = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 
     const fetchUsers = useCallback(async () => {
-        if (!token) return;
+        if (!token || !canAccess) {
+            setUsers([]);
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
             const params = new URLSearchParams({ page: String(page), limit: '20' });
@@ -50,25 +55,25 @@ export default function UsersPage() {
         } finally {
             setLoading(false);
         }
-    }, [token, page, search]);
+    }, [token, canAccess, page, search]);
 
     useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
     const handleCreate = async (data: Record<string, unknown>) => {
-        if (!token) return;
+        if (!token || !canAccess) return;
         await userApi.create(data, token);
         fetchUsers();
     };
 
     const handleUpdate = async (data: Record<string, unknown>) => {
-        if (!token || !editingUser) return;
+        if (!token || !canAccess || !editingUser) return;
         await userApi.update(editingUser.id, data, token);
         setEditingUser(null);
         fetchUsers();
     };
 
     const handleToggleActive = async (id: string) => {
-        if (!token) return;
+        if (!token || !canAccess) return;
         await userApi.toggleActive(id, token);
         fetchUsers();
     };
