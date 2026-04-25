@@ -48,6 +48,20 @@ enum InvoiceItemCategory {
   OTHER
 }
 
+enum ReportType {
+  BLOOD_REPORT
+  ECG
+  ULTRASOUND
+  XRAY
+  OTHER
+}
+
+enum ReportDeliveryStatus {
+  NOT_SENT
+  SENT
+  FAILED
+}
+
 // ─── Hospital / Tenant ───────────────────────────────────────────────────────
 
 model Hospital {
@@ -69,6 +83,7 @@ model Hospital {
   appointments Appointment[]
   invoices     Invoice[]
   medicines    Medicine[]
+  reports      MedicalReport[]
 
   @@map("hospitals")
 }
@@ -93,6 +108,7 @@ model User {
 
   // A doctor can be a provider for appointments
   appointments Appointment[] @relation("ProviderAppointments")
+  uploadedReports MedicalReport[] @relation("UploadedReports")
 
   @@index([hospitalId])
   @@map("users")
@@ -126,6 +142,7 @@ model Patient {
 
   appointments Appointment[]
   invoices     Invoice[]
+  reports      MedicalReport[]
 
   @@index([lastName, firstName])
   @@index([deletedAt])
@@ -273,3 +290,33 @@ model MedicineBatch {
   @@map("medicine_batches")
 }
 
+// ─── Medical Reports ────────────────────────────────────────────────────────
+
+model MedicalReport {
+  id             String               @id @default(uuid()) @db.Uuid
+  title          String
+  type           ReportType
+  reportDate     DateTime             @default(now()) @map("report_date")
+  notes          String?
+  fileUrl        String               @map("file_url")
+  s3Key          String?              @map("s3_key")
+  aiSummary      String?              @map("ai_summary")
+  deliveryStatus ReportDeliveryStatus @default(NOT_SENT) @map("delivery_status")
+  deliveredAt    DateTime?            @map("delivered_at")
+  deliveryError  String?              @map("delivery_error")
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+
+  patientId    String  @map("patient_id") @db.Uuid
+  patient      Patient @relation(fields: [patientId], references: [id])
+  hospitalId   String   @map("hospital_id") @db.Uuid
+  hospital     Hospital @relation(fields: [hospitalId], references: [id])
+  uploadedById String? @map("uploaded_by_id") @db.Uuid
+  uploadedBy   User?   @relation("UploadedReports", fields: [uploadedById], references: [id])
+
+  @@index([patientId])
+  @@index([hospitalId])
+  @@index([type])
+  @@index([deliveryStatus])
+  @@map("medical_reports")
+}

@@ -66,8 +66,47 @@ export interface MedicineBatch {
     updatedAt: string;
 }
 
+export type ReportType = 'BLOOD_REPORT' | 'ECG' | 'ULTRASOUND' | 'XRAY' | 'OTHER';
+export type ReportDeliveryStatus = 'NOT_SENT' | 'SENT' | 'FAILED';
+
+export interface MedicalReport {
+    id: string;
+    title: string;
+    type: ReportType;
+    reportDate: string;
+    notes?: string | null;
+    fileUrl: string;
+    aiSummary?: string | null;
+    deliveryStatus: ReportDeliveryStatus;
+    deliveredAt?: string | null;
+    deliveryError?: string | null;
+    createdAt: string;
+    updatedAt: string;
+    patient: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        mrn: string;
+        phone: string;
+    };
+    hospital: {
+        id: string;
+        name: string;
+    };
+    uploadedBy?: {
+        id: string;
+        firstName: string;
+        lastName: string;
+    } | null;
+}
+
 interface RequestOptions extends RequestInit {
     token?: string;
+}
+
+interface MultipartRequestOptions extends RequestInit {
+    token?: string;
+    body: FormData;
 }
 
 class ApiClient {
@@ -124,6 +163,32 @@ class ApiClient {
 
     async delete<T>(endpoint: string, token?: string): Promise<T> {
         return this.request<T>(endpoint, { method: 'DELETE', token });
+    }
+
+    async multipart<T>(endpoint: string, options: MultipartRequestOptions): Promise<T> {
+        const { token, body, ...fetchOptions } = options;
+
+        const headers: HeadersInit = {
+            ...(token && { Authorization: `Bearer ${token}` }),
+            ...options.headers,
+        };
+
+        const response = await fetch(`${this.baseUrl}${endpoint}`, {
+            ...fetchOptions,
+            method: fetchOptions.method || 'POST',
+            body,
+            headers,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new ApiError(
+                response.status,
+                errorData.message || `Request failed with status ${response.status}`,
+            );
+        }
+
+        return response.json();
     }
 }
 
@@ -250,4 +315,17 @@ export const pharmacyApi = {
     addStock: (id: string, data: AddStockPayload, token: string) =>
         apiClient.post<{ batch: MedicineBatch; medicine: Medicine }>(`/pharmacy/medicines/${id}/stock`, data, token),
     getLowStock: (token: string) => apiClient.get<Medicine[]>('/pharmacy/alerts/low-stock', token),
+};
+
+// ─── Reports API ─────────────────────────────────────────────────────────────
+
+export const reportsApi = {
+    getAll: (query: string = '', token: string) =>
+        apiClient.get<PaginatedResponse<MedicalReport>>(`/reports?${query}`, token),
+    getById: (id: string, token: string) =>
+        apiClient.get<MedicalReport>(`/reports/${id}`, token),
+    create: (data: FormData, token: string) =>
+        apiClient.multipart<MedicalReport>('/reports', { body: data, token }),
+    send: (id: string, token: string) =>
+        apiClient.post<MedicalReport>(`/reports/${id}/send`, {}, token),
 };
