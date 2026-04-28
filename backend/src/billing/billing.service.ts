@@ -11,6 +11,51 @@ import { PdfService } from '../pdf/pdf.service';
 import { UploadService } from '../upload/upload.service';
 import { PharmacyService } from '../pharmacy/pharmacy.service';
 
+type InvoicePdfSource = {
+    invoiceNumber: string;
+    createdAt: Date;
+    paymentStatus: string;
+    subtotalCents: number;
+    taxRate: unknown;
+    taxAmountCents: number;
+    discountCents: number;
+    totalCents: number;
+    notes?: string | null;
+    hospital: {
+        name: string;
+        address?: string | null;
+        city?: string | null;
+        state?: string | null;
+        zipCode?: string | null;
+        phone?: string | null;
+    };
+    patient: {
+        firstName: string;
+        lastName: string;
+        mrn: string;
+        phone?: string | null;
+        address?: string | null;
+        city?: string | null;
+        state?: string | null;
+        zipCode?: string | null;
+    };
+    appointment?: {
+        appointmentDate: Date;
+        status?: string;
+        provider?: {
+            firstName: string;
+            lastName: string;
+        };
+    } | null;
+    items: Array<{
+        description: string;
+        category: string;
+        unitPriceCents: number;
+        quantity: number;
+        totalCents: number;
+    }>;
+};
+
 @Injectable()
 export class BillingService {
     constructor(
@@ -28,6 +73,65 @@ export class BillingService {
         const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
         const randomPart = randomBytes(2).toString('hex').toUpperCase();
         return `INV-${datePart}-${randomPart}`;
+    }
+
+    private formatDate(date?: Date | null): string {
+        if (!date) return 'N/A';
+        return date.toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        });
+    }
+
+    private formatDateTime(date?: Date | null): string {
+        if (!date) return 'N/A';
+        return date.toLocaleString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    }
+
+    private buildInvoicePdfData(invoice: InvoicePdfSource) {
+        return {
+            invoiceNumber: invoice.invoiceNumber,
+            date: this.formatDate(invoice.createdAt),
+            paymentStatus: invoice.paymentStatus,
+            hospitalName: invoice.hospital.name,
+            hospitalAddress: invoice.hospital.address,
+            hospitalCity: invoice.hospital.city,
+            hospitalState: invoice.hospital.state,
+            hospitalZip: invoice.hospital.zipCode,
+            hospitalPhone: invoice.hospital.phone,
+            patientName: `${invoice.patient.firstName} ${invoice.patient.lastName}`,
+            patientMrn: invoice.patient.mrn,
+            patientPhone: invoice.patient.phone,
+            patientAddress: invoice.patient.address,
+            patientCity: invoice.patient.city,
+            patientState: invoice.patient.state,
+            patientZip: invoice.patient.zipCode,
+            appointmentDate: this.formatDateTime(invoice.appointment?.appointmentDate),
+            appointmentStatus: invoice.appointment?.status,
+            providerName: invoice.appointment?.provider
+                ? `Dr. ${invoice.appointment.provider.firstName} ${invoice.appointment.provider.lastName}`
+                : undefined,
+            items: invoice.items.map(item => ({
+                description: item.description,
+                category: item.category,
+                unitPrice: (item.unitPriceCents / 100).toFixed(2),
+                quantity: item.quantity,
+                total: (item.totalCents / 100).toFixed(2),
+            })),
+            subtotal: (invoice.subtotalCents / 100).toFixed(2),
+            taxRate: (Number(invoice.taxRate) * 100).toFixed(2),
+            taxAmount: (invoice.taxAmountCents / 100).toFixed(2),
+            discount: (invoice.discountCents / 100).toFixed(2),
+            totalAmount: (invoice.totalCents / 100).toFixed(2),
+            notes: invoice.notes,
+        };
     }
 
     async create(dto: CreateInvoiceDto, hospitalId: string) {
@@ -98,10 +202,14 @@ export class BillingService {
             include: {
                 items: true,
                 patient: {
-                    select: { id: true, firstName: true, lastName: true, mrn: true, address: true, city: true, state: true, zipCode: true },
+                    select: { id: true, firstName: true, lastName: true, mrn: true, phone: true, address: true, city: true, state: true, zipCode: true },
                 },
                 appointment: {
-                    select: { id: true, appointmentDate: true, status: true },
+                    include: {
+                        provider: {
+                            select: { id: true, firstName: true, lastName: true },
+                        },
+                    },
                 },
                 hospital: true,
             },
@@ -109,36 +217,7 @@ export class BillingService {
 
         // Generate PDF
         try {
-            const pdfData = {
-                invoiceNumber: invoice.invoiceNumber,
-                date: invoice.createdAt.toLocaleDateString(),
-                paymentStatus: invoice.paymentStatus,
-                hospitalName: invoice.hospital.name,
-                hospitalAddress: invoice.hospital.address,
-                hospitalCity: invoice.hospital.city,
-                hospitalState: invoice.hospital.state,
-                hospitalZip: invoice.hospital.zipCode,
-                hospitalPhone: invoice.hospital.phone,
-                patientName: `${invoice.patient.firstName} ${invoice.patient.lastName}`,
-                patientAddress: invoice.patient.address,
-                patientCity: invoice.patient.city,
-                patientState: invoice.patient.state,
-                patientZip: invoice.patient.zipCode,
-                items: invoice.items.map(item => ({
-                    description: item.description,
-                    category: item.category,
-                    unitPrice: (item.unitPriceCents / 100).toFixed(2),
-                    quantity: item.quantity,
-                    total: (item.totalCents / 100).toFixed(2),
-                })),
-                subtotal: (invoice.subtotalCents / 100).toFixed(2),
-                taxRate: (Number(invoice.taxRate) * 100).toFixed(2),
-                taxAmount: (invoice.taxAmountCents / 100).toFixed(2),
-                discount: (invoice.discountCents / 100).toFixed(2),
-                totalAmount: (invoice.totalCents / 100).toFixed(2),
-                notes: invoice.notes,
-            };
-
+            const pdfData = this.buildInvoicePdfData(invoice);
             const pdfBuffer = await this.pdfService.generateInvoicePdf(pdfData);
             const s3Key = `invoices/${hospitalId}/${invoice.id}.pdf`;
             const pdfUrl = await this.uploadService.uploadFile(s3Key, pdfBuffer, 'application/pdf');
@@ -289,10 +368,14 @@ export class BillingService {
             include: {
                 items: true,
                 patient: {
-                    select: { id: true, firstName: true, lastName: true, mrn: true, address: true, city: true, state: true, zipCode: true },
+                    select: { id: true, firstName: true, lastName: true, mrn: true, phone: true, address: true, city: true, state: true, zipCode: true },
                 },
                 appointment: {
-                    select: { id: true, appointmentDate: true, status: true },
+                    include: {
+                        provider: {
+                            select: { id: true, firstName: true, lastName: true },
+                        },
+                    },
                 },
                 hospital: true,
             },
@@ -300,36 +383,7 @@ export class BillingService {
 
         // Regenerate PDF
         try {
-            const pdfData = {
-                invoiceNumber: result.invoiceNumber,
-                date: result.createdAt.toLocaleDateString(),
-                paymentStatus: result.paymentStatus,
-                hospitalName: result.hospital.name,
-                hospitalAddress: result.hospital.address,
-                hospitalCity: result.hospital.city,
-                hospitalState: result.hospital.state,
-                hospitalZip: result.hospital.zipCode,
-                hospitalPhone: result.hospital.phone,
-                patientName: `${result.patient.firstName} ${result.patient.lastName}`,
-                patientAddress: result.patient.address,
-                patientCity: result.patient.city,
-                patientState: result.patient.state,
-                patientZip: result.patient.zipCode,
-                items: result.items.map(item => ({
-                    description: item.description,
-                    category: item.category,
-                    unitPrice: (item.unitPriceCents / 100).toFixed(2),
-                    quantity: item.quantity,
-                    total: (item.totalCents / 100).toFixed(2),
-                })),
-                subtotal: (result.subtotalCents / 100).toFixed(2),
-                taxRate: (Number(result.taxRate) * 100).toFixed(2),
-                taxAmount: (result.taxAmountCents / 100).toFixed(2),
-                discount: (result.discountCents / 100).toFixed(2),
-                totalAmount: (result.totalCents / 100).toFixed(2),
-                notes: result.notes,
-            };
-
+            const pdfData = this.buildInvoicePdfData(result);
             const pdfBuffer = await this.pdfService.generateInvoicePdf(pdfData);
             const s3Key = `invoices/${hospitalId}/${result.id}.pdf`;
             const pdfUrl = await this.uploadService.uploadFile(s3Key, pdfBuffer, 'application/pdf');

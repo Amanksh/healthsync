@@ -10,6 +10,9 @@ export declare class BillingService {
     private pharmacyService;
     constructor(prisma: PrismaService, pdfService: PdfService, uploadService: UploadService, pharmacyService: PharmacyService);
     private generateInvoiceNumber;
+    private formatDate;
+    private formatDateTime;
+    private buildInvoicePdfData;
     create(dto: CreateInvoiceDto, hospitalId: string): Promise<{
         patient: {
             id: string;

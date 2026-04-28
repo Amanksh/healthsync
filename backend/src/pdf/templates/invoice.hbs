@@ -5,177 +5,467 @@
     <meta charset="utf-8" />
     <title>Invoice {{invoiceNumber}}</title>
     <style>
-        body {
-            font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
-            color: #555;
-            max-width: 800px;
-            margin: auto;
-            padding: 30px;
-            font-size: 16px;
-            line-height: 24px;
+        * {
+            box-sizing: border-box;
         }
 
-        .invoice-box {
-            border: 1px solid #eee;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
-            padding: 30px;
+        body {
+            margin: 0;
+            padding: 0;
+            background: #eef2f7;
+            color: #172033;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .page {
+            width: 794px;
+            min-height: 1123px;
+            margin: 0 auto;
+            padding: 28px;
+            background: #f8fafc;
+        }
+
+        .card {
+            overflow: hidden;
+            border: 1px solid #d8e3ea;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
+        }
+
+        .top-band {
+            padding: 24px 28px;
+            background: linear-gradient(135deg, #0f766e 0%, #0e7490 100%);
+            color: #ffffff;
         }
 
         .header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            color: #333;
-            margin: 0;
-        }
-
-        .hospital-info {
-            text-align: right;
-        }
-
-        .invoice-details {
-            margin-bottom: 40px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 20px;
-        }
-
-        .patient-info {
-            margin-bottom: 20px;
-        }
-
-        table {
+            display: table;
             width: 100%;
-            line-height: inherit;
-            text-align: left;
-            border-collapse: collapse;
         }
 
-        table td {
-            padding: 5px;
+        .header-left,
+        .header-right {
+            display: table-cell;
             vertical-align: top;
         }
 
-        table tr.heading td {
-            background: #eee;
-            border-bottom: 1px solid #ddd;
-            font-weight: bold;
+        .header-right {
+            width: 230px;
+            text-align: right;
         }
 
-        table tr.item td {
-            border-bottom: 1px solid #eee;
+        .hospital-name {
+            margin: 0 0 6px;
+            font-size: 25px;
+            line-height: 1.15;
+            font-weight: 800;
+            letter-spacing: 0;
         }
 
-        table tr.total td:nth-child(2) {
-            border-top: 2px solid #eee;
-            font-weight: bold;
+        .hospital-meta {
+            max-width: 430px;
+            color: #d9fbf8;
+            font-size: 12px;
+        }
+
+        .document-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0;
+            text-transform: uppercase;
+        }
+
+        .invoice-no {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #d9fbf8;
+        }
+
+        .status {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 5px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .body {
+            padding: 24px 28px 28px;
+        }
+
+        .patient-card {
+            overflow: hidden;
+            border: 1px solid #cbdde4;
+            border-radius: 10px;
+            background: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .patient-card-header {
+            display: table;
+            width: 100%;
+            padding: 12px 16px;
+            background: #e6f7f5;
+            border-bottom: 1px solid #cbdde4;
+        }
+
+        .patient-card-title,
+        .patient-card-mrn {
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+        .patient-card-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: #0f766e;
+            text-transform: uppercase;
+        }
+
+        .patient-card-mrn {
+            text-align: right;
+            font-family: "Courier New", monospace;
+            font-size: 12px;
+            font-weight: 800;
+            color: #0f766e;
+        }
+
+        .patient-grid {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            padding: 14px 16px 16px;
+        }
+
+        .patient-row {
+            display: table-row;
+        }
+
+        .patient-cell {
+            display: table-cell;
+            width: 25%;
+            padding: 8px 12px 8px 0;
+            vertical-align: top;
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 3px;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .value {
+            color: #172033;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .muted {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .section-title {
+            margin: 0 0 10px;
+            color: #172033;
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            border: 1px solid #dbe5ea;
+            border-radius: 10px;
+        }
+
+        .items-table th {
+            padding: 11px 12px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 10px;
+            font-weight: 800;
+            text-align: left;
+            text-transform: uppercase;
+            border-bottom: 1px solid #dbe5ea;
+        }
+
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #edf2f7;
+            vertical-align: top;
+        }
+
+        .items-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .item-name {
+            color: #172033;
+            font-weight: 800;
+        }
+
+        .item-category {
+            margin-top: 2px;
+            color: #64748b;
+            font-size: 11px;
         }
 
         .text-right {
             text-align: right;
         }
 
-        .status-paid {
-            color: green;
-            font-weight: bold;
-            border: 2px solid green;
-            padding: 5px 10px;
-            border-radius: 5px;
-            display: inline-block;
+        .summary-wrap {
+            display: table;
+            width: 100%;
+            margin-top: 18px;
         }
 
-        .status-pending {
-            color: orange;
-            font-weight: bold;
-            border: 2px solid orange;
-            padding: 5px 10px;
-            border-radius: 5px;
-            display: inline-block;
+        .notes,
+        .summary {
+            display: table-cell;
+            vertical-align: top;
+        }
+
+        .notes {
+            width: 52%;
+            padding-right: 18px;
+        }
+
+        .notes-box {
+            min-height: 100px;
+            padding: 14px;
+            border: 1px solid #dbe5ea;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+        .summary {
+            width: 48%;
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .summary-table td {
+            padding: 8px 0;
+            border-bottom: 1px solid #e5edf2;
+        }
+
+        .summary-table .label-cell {
+            color: #64748b;
+            font-weight: 700;
+        }
+
+        .summary-table .amount-cell {
+            text-align: right;
+            color: #172033;
+            font-weight: 800;
+        }
+
+        .summary-total td {
+            padding-top: 12px;
+            border-bottom: 0;
+            color: #0f766e;
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        .footer {
+            display: table;
+            width: 100%;
+            margin-top: 28px;
+            padding-top: 18px;
+            border-top: 1px solid #dbe5ea;
+        }
+
+        .footer-left,
+        .footer-right {
+            display: table-cell;
+            vertical-align: bottom;
+        }
+
+        .footer-left {
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .footer-right {
+            width: 210px;
+            text-align: center;
+        }
+
+        .signature-line {
+            height: 40px;
+            border-bottom: 1px solid #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .signature-label {
+            color: #475569;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
         }
     </style>
 </head>
 
 <body>
-    <div class="invoice-box">
-        <div class="header">
-            <div>
-                <h1>INVOICE</h1>
-                <p><strong>#{{invoiceNumber}}</strong><br>
-                    Date: {{date}}</p>
-                {{#if paymentStatus}}
-                <div class="status-{{paymentStatus}}">{{paymentStatus}}</div>
-                {{/if}}
+    <div class="page">
+        <div class="card">
+            <div class="top-band">
+                <div class="header">
+                    <div class="header-left">
+                        <h1 class="hospital-name">{{hospitalName}}</h1>
+                        <div class="hospital-meta">
+                            {{#if hospitalAddress}}{{hospitalAddress}}{{/if}}
+                            {{#if hospitalCity}}<br>{{hospitalCity}}, {{hospitalState}} {{hospitalZip}}{{/if}}
+                            {{#if hospitalPhone}}<br>Phone: {{hospitalPhone}}{{/if}}
+                        </div>
+                    </div>
+                    <div class="header-right">
+                        <p class="document-title">Clinical Billing Card</p>
+                        <div class="invoice-no">Invoice {{invoiceNumber}}<br>Issued {{date}}</div>
+                        {{#if paymentStatus}}
+                        <span class="status">{{paymentStatus}}</span>
+                        {{/if}}
+                    </div>
+                </div>
             </div>
-            <div class="hospital-info">
-                <h3>{{hospitalName}}</h3>
-                {{#if hospitalAddress}}
-                {{hospitalAddress}}<br>
-                {{/if}}
-                {{#if hospitalCity}}
-                {{hospitalCity}}, {{hospitalState}} {{hospitalZip}}<br>
-                {{/if}}
-                {{#if hospitalPhone}}
-                Phone: {{hospitalPhone}}
-                {{/if}}
+
+            <div class="body">
+                <div class="patient-card">
+                    <div class="patient-card-header">
+                        <div class="patient-card-title">Patient Billing Profile</div>
+                        <div class="patient-card-mrn">MRN {{patientMrn}}</div>
+                    </div>
+                    <div class="patient-grid">
+                        <div class="patient-row">
+                            <div class="patient-cell">
+                                <span class="label">Patient</span>
+                                <span class="value">{{patientName}}</span>
+                            </div>
+                            <div class="patient-cell">
+                                <span class="label">Phone</span>
+                                <span class="value">{{#if patientPhone}}{{patientPhone}}{{else}}N/A{{/if}}</span>
+                            </div>
+                            <div class="patient-cell">
+                                <span class="label">Visit Date</span>
+                                <span class="value">{{appointmentDate}}</span>
+                            </div>
+                            <div class="patient-cell">
+                                <span class="label">Provider</span>
+                                <span class="value">{{#if providerName}}{{providerName}}{{else}}N/A{{/if}}</span>
+                            </div>
+                        </div>
+                        <div class="patient-row">
+                            <div class="patient-cell">
+                                <span class="label">Address</span>
+                                <span class="value muted">
+                                    {{#if patientAddress}}
+                                    {{patientAddress}}{{#if patientCity}}, {{patientCity}}{{/if}}{{#if patientState}}, {{patientState}}{{/if}} {{patientZip}}
+                                    {{else}}
+                                    N/A
+                                    {{/if}}
+                                </span>
+                            </div>
+                            <div class="patient-cell">
+                                <span class="label">Appointment Status</span>
+                                <span class="value">{{#if appointmentStatus}}{{appointmentStatus}}{{else}}N/A{{/if}}</span>
+                            </div>
+                            <div class="patient-cell">
+                                <span class="label">Billing Ref</span>
+                                <span class="value">{{invoiceNumber}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="section-title">Clinical Charges</h2>
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Service / Item</th>
+                            <th class="text-right">Unit Price</th>
+                            <th class="text-right">Qty</th>
+                            <th class="text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each items}}
+                        <tr>
+                            <td>
+                                <div class="item-name">{{description}}</div>
+                                <div class="item-category">{{category}}</div>
+                            </td>
+                            <td class="text-right">&#8377;{{unitPrice}}</td>
+                            <td class="text-right">{{quantity}}</td>
+                            <td class="text-right">&#8377;{{total}}</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+
+                <div class="summary-wrap">
+                    <div class="notes">
+                        <div class="notes-box">
+                            <span class="label">Clinical / Billing Notes</span>
+                            <div class="muted">
+                                {{#if notes}}{{notes}}{{else}}No additional notes recorded.{{/if}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="summary">
+                        <table class="summary-table">
+                            <tr>
+                                <td class="label-cell">Subtotal</td>
+                                <td class="amount-cell">&#8377;{{subtotal}}</td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">Tax ({{taxRate}}%)</td>
+                                <td class="amount-cell">&#8377;{{taxAmount}}</td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">Discount</td>
+                                <td class="amount-cell">-&#8377;{{discount}}</td>
+                            </tr>
+                            <tr class="summary-total">
+                                <td>Total Payable</td>
+                                <td class="amount-cell">&#8377;{{totalAmount}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-left">
+                        This is a computer-generated clinical billing document. Please retain it with the patient file
+                        for insurance, reimbursement, and hospital records.
+                    </div>
+                    <div class="footer-right">
+                        <div class="signature-line"></div>
+                        <div class="signature-label">Authorized Signature</div>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <div class="invoice-details">
-            <div class="patient-info">
-                <strong>Bill To:</strong><br>
-                {{patientName}}<br>
-                {{#if patientAddress}}
-                {{patientAddress}}<br>
-                {{patientCity}}, {{patientState}} {{patientZip}}
-                {{/if}}
-            </div>
-        </div>
-
-        <table>
-            <tr class="heading">
-                <td>Item</td>
-                <td class="text-right">Price</td>
-                <td class="text-right">Qty</td>
-                <td class="text-right">Total</td>
-            </tr>
-
-            {{#each items}}
-            <tr class="item">
-                <td>{{description}} <br><small style="color: #888;">{{category}}</small></td>
-                <td class="text-right">&#8377;{{unitPrice}}</td>
-                <td class="text-right">{{quantity}}</td>
-                <td class="text-right">&#8377;{{total}}</td>
-            </tr>
-            {{/each}}
-
-            <tr class="total">
-                <td colspan="3" class="text-right">Subtotal:</td>
-                <td class="text-right">&#8377;{{subtotal}}</td>
-            </tr>
-            <tr>
-                <td colspan="3" class="text-right">Tax ({{taxRate}}%):</td>
-                <td class="text-right">&#8377;{{taxAmount}}</td>
-            </tr>
-            {{#if discount}}
-            <tr>
-                <td colspan="3" class="text-right">Discount:</td>
-                <td class="text-right">-&#8377;{{discount}}</td>
-            </tr>
-            {{/if}}
-            <tr>
-                <td colspan="3" class="text-right"><strong>Total:</strong></td>
-                <td class="text-right"><strong>&#8377;{{totalAmount}}</strong></td>
-            </tr>
-        </table>
-
-        {{#if notes}}
-        <div style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 10px;">
-            <strong>Notes:</strong><br>
-            {{notes}}
-        </div>
-        {{/if}}
     </div>
 </body>
 
