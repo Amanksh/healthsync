@@ -4,100 +4,111 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { FileText, Stethoscope } from 'lucide-react';
+import {
+    Building2,
+    CalendarDays,
+    ClipboardList,
+    FileText,
+    LayoutDashboard,
+    LogOut,
+    Pill,
+    ReceiptText,
+    Stethoscope,
+    UserCog,
+    UsersRound,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
-const navItems = [
+type NavItem = {
+    label: string;
+    href: string;
+    icon: LucideIcon;
+    iconClass: string;
+    iconBgClass: string;
+};
+
+const navItems: NavItem[] = [
     {
         label: 'Dashboard',
         href: '/dashboard',
-        icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25a2.25 2.25 0 0 1-2.25-2.25v-2.25Z" />
-            </svg>
-        ),
+        icon: LayoutDashboard,
+        iconClass: 'text-blue-600',
+        iconBgClass: 'bg-blue-50 border-blue-100',
     },
     {
         label: 'Patients',
         href: '/patients',
-        icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-            </svg>
-        ),
+        icon: UsersRound,
+        iconClass: 'text-emerald-600',
+        iconBgClass: 'bg-emerald-50 border-emerald-100',
     },
     {
         label: 'Appointments',
         href: '/appointments',
-        icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-            </svg>
-        ),
+        icon: CalendarDays,
+        iconClass: 'text-purple-600',
+        iconBgClass: 'bg-purple-50 border-purple-100',
     },
     {
         label: 'OPD',
         href: '/opd',
-        icon: <Stethoscope className="w-5 h-5" />,
+        icon: Stethoscope,
+        iconClass: 'text-teal-600',
+        iconBgClass: 'bg-teal-50 border-teal-100',
     },
     {
         label: 'Reports',
         href: '/reports',
-        icon: <FileText className="w-5 h-5" />,
+        icon: FileText,
+        iconClass: 'text-cyan-600',
+        iconBgClass: 'bg-cyan-50 border-cyan-100',
     },
     {
         label: 'Billing',
         href: '/billing',
-        icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
-            </svg>
-        ),
+        icon: ReceiptText,
+        iconClass: 'text-amber-700',
+        iconBgClass: 'bg-amber-50 border-amber-100',
     },
     {
         label: 'Pharmacy',
         href: '/pharmacy',
-        icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-            </svg>
-        ),
+        icon: Pill,
+        iconClass: 'text-rose-600',
+        iconBgClass: 'bg-rose-50 border-rose-100',
     },
     {
         label: 'Pharmacy Billing',
         href: '/pharmacy/billing',
-        icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
-            </svg>
-        ),
+        icon: ClipboardList,
+        iconClass: 'text-orange-600',
+        iconBgClass: 'bg-orange-50 border-orange-100',
     },
 ];
 
-const hospitalNavItem = {
+const hospitalNavItem: NavItem = {
     label: 'Hospitals',
     href: '/hospitals',
-    icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
-        </svg>
-    ),
+    icon: Building2,
+    iconClass: 'text-blue-700',
+    iconBgClass: 'bg-blue-50 border-blue-100',
 };
 
-const staffNavItem = {
+const staffNavItem: NavItem = {
     label: 'Staff',
     href: '/users',
-    icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-        </svg>
-    ),
+    icon: UserCog,
+    iconClass: 'text-pink-600',
+    iconBgClass: 'bg-pink-50 border-pink-100',
 };
 
 export default function Sidebar() {
     const pathname = usePathname();
     const { user, logout } = useAuth();
 
-    const renderNavLink = (item: { label: string; href: string; icon: React.ReactNode }) => {
+    const renderNavLink = (item: NavItem) => {
+        const Icon = item.icon;
+
         // Collect all potential routes (including conditional ones to be safe, or just the main ones)
         // Ideally we only check against *active* links, but checking against all valid routes is safer for consistency.
         const allItems = [
@@ -122,11 +133,13 @@ export default function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
-                    ? 'bg-teal-50 text-teal-700 shadow-sm'
+                    ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-100'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                     }`}
             >
-                <span className={isActive ? 'text-teal-600' : ''}>{item.icon}</span>
+                <span className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border ${item.iconBgClass} ${isActive ? 'shadow-sm' : ''}`}>
+                    <Icon className={`h-5 w-5 ${item.iconClass}`} strokeWidth={2} />
+                </span>
                 {item.label}
             </Link>
         );
@@ -174,9 +187,7 @@ export default function Sidebar() {
                     onClick={logout}
                     className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-                    </svg>
+                    <LogOut className="h-4 w-4" strokeWidth={2} />
                     Sign out
                 </button>
             </div>
