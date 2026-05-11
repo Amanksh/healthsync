@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import {
+    BedDouble,
     Building2,
     CalendarDays,
     ClipboardList,
@@ -55,6 +56,13 @@ const navItems: NavItem[] = [
         icon: Stethoscope,
         iconClass: 'text-teal-600',
         iconBgClass: 'bg-teal-50 border-teal-100',
+    },
+    {
+        label: 'IPD / Wards',
+        href: '/ipd',
+        icon: BedDouble,
+        iconClass: 'text-indigo-600',
+        iconBgClass: 'bg-indigo-50 border-indigo-100',
     },
     {
         label: 'Reports',

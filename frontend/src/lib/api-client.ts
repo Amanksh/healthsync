@@ -329,3 +329,118 @@ export const reportsApi = {
     send: (id: string, token: string) =>
         apiClient.post<MedicalReport>(`/reports/${id}/send`, {}, token),
 };
+
+// ─── Ward / IPD Types ────────────────────────────────────────────────────────
+
+export type BedStatus = 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE' | 'RESERVED';
+export type AdmissionStatus = 'ADMITTED' | 'DISCHARGED' | 'TRANSFERRED';
+
+export interface Ward {
+    id: string;
+    name: string;
+    floor?: string | null;
+    type?: string | null;
+    description?: string | null;
+    isActive: boolean;
+    hospitalId: string;
+    beds: Bed[];
+    _count?: { beds: number };
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface Bed {
+    id: string;
+    bedNumber: string;
+    status: BedStatus;
+    notes?: string | null;
+    wardId: string;
+    currentAdmission?: Admission | null;
+}
+
+export interface Admission {
+    id: string;
+    admissionDate: string;
+    dischargeDate?: string | null;
+    status: AdmissionStatus;
+    diagnosis?: string | null;
+    notes?: string | null;
+    patient: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        mrn: string;
+        gender: string;
+        dateOfBirth?: string;
+        phone?: string;
+        bloodGroup?: string | null;
+        allergies?: string | null;
+    };
+    bed: {
+        id: string;
+        bedNumber: string;
+        ward?: { id: string; name: string; floor?: string | null };
+    };
+    attendingDoctor?: {
+        id: string;
+        firstName: string;
+        lastName: string;
+    } | null;
+}
+
+export interface WardSummary {
+    totalWards: number;
+    totalBeds: number;
+    occupiedBeds: number;
+    availableBeds: number;
+    maintenanceBeds: number;
+    occupancyRate: number;
+    wardBreakdown: Array<{
+        wardId: string;
+        wardName: string;
+        floor?: string | null;
+        type?: string | null;
+        total: number;
+        occupied: number;
+        available: number;
+        maintenance: number;
+    }>;
+}
+
+// ─── Ward / IPD API ──────────────────────────────────────────────────────────
+
+export const wardApi = {
+    // Wards
+    getAll: (token: string) =>
+        apiClient.get<Ward[]>('/wards', token),
+    getById: (id: string, token: string) =>
+        apiClient.get<Ward>(`/wards/${id}`, token),
+    create: (data: unknown, token: string) =>
+        apiClient.post<Ward>('/wards', data, token),
+    update: (id: string, data: unknown, token: string) =>
+        apiClient.patch<Ward>(`/wards/${id}`, data, token),
+    delete: (id: string, token: string) =>
+        apiClient.delete(`/wards/${id}`, token),
+
+    // Beds
+    addBeds: (wardId: string, data: unknown, token: string) =>
+        apiClient.post(`/wards/${wardId}/beds`, data, token),
+    updateBed: (wardId: string, bedId: string, data: unknown, token: string) =>
+        apiClient.patch(`/wards/${wardId}/beds/${bedId}`, data, token),
+    deleteBed: (wardId: string, bedId: string, token: string) =>
+        apiClient.delete(`/wards/${wardId}/beds/${bedId}`, token),
+
+    // Admissions
+    admit: (data: unknown, token: string) =>
+        apiClient.post<Admission>('/wards/admissions', data, token),
+    discharge: (id: string, data: unknown, token: string) =>
+        apiClient.patch<Admission>(`/wards/admissions/${id}/discharge`, data, token),
+    getAdmissions: (query: string = '', token: string) =>
+        apiClient.get<PaginatedResponse<Admission>>(`/wards/admissions?${query}`, token),
+    getAdmission: (id: string, token: string) =>
+        apiClient.get<Admission>(`/wards/admissions/${id}`, token),
+
+    // Summary
+    getSummary: (token: string) =>
+        apiClient.get<WardSummary>('/wards/summary', token),
+};

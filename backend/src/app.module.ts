@@ -11,6 +11,7 @@ import { PdfModule } from './pdf/pdf.module';
 import { UploadModule } from './upload/upload.module';
 import { PharmacyModule } from './pharmacy/pharmacy.module';
 import { ReportsModule } from './reports/reports.module';
+import { WardModule } from './ward/ward.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ReportsModule } from './reports/reports.module';
     UploadModule,
     PharmacyModule,
     ReportsModule,
+    WardModule,
   ],
 })
 export class AppModule { }

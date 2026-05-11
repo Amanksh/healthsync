@@ -20,6 +20,7 @@ const pdf_module_1 = require("./pdf/pdf.module");
 const upload_module_1 = require("./upload/upload.module");
 const pharmacy_module_1 = require("./pharmacy/pharmacy.module");
 const reports_module_1 = require("./reports/reports.module");
+const ward_module_1 = require("./ward/ward.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -38,6 +39,7 @@ exports.AppModule = AppModule = __decorate([
             upload_module_1.UploadModule,
             pharmacy_module_1.PharmacyModule,
             reports_module_1.ReportsModule,
+            ward_module_1.WardModule,
         ],
     })
 ], AppModule);
