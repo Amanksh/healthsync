@@ -175,11 +175,10 @@ export default function InvoiceFormModal({
                                 <div className="col-span-4">
                                     {i === 0 && <label className="block text-xs text-gray-400 mb-1">Description</label>}
                                     <input
-                                        required
                                         value={item.description}
                                         onChange={(e) => updateItem(i, 'description', e.target.value)}
                                         className={inputClass}
-                                        placeholder="Item description"
+                                        placeholder="Item description (optional)"
                                     />
                                 </div>
                                 <div className="col-span-3">

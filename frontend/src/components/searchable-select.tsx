@@ -176,10 +176,10 @@ export default function SearchableSelect({
                     className={`${inputClass} text-left flex items-center justify-between gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                     {selectedOption ? (
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <span className="truncate font-medium text-gray-900">{selectedOption.label}</span>
+                        <div className="min-w-0 flex-1">
+                            <span className="block truncate font-medium text-gray-900">{selectedOption.label}</span>
                             {selectedOption.sublabel && (
-                                <span className="text-xs text-gray-400 shrink-0">{selectedOption.sublabel}</span>
+                                <span className="block text-xs text-gray-400 truncate">{selectedOption.sublabel}</span>
                             )}
                         </div>
                     ) : (

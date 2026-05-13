@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { appointmentApi, patientApi, apiClient } from '@/lib/api-client';
+import { appointmentApi } from '@/lib/api-client';
 import DataTable, { Column } from '@/components/data-table';
-import AppointmentFormModal from '@/components/appointment-form-modal';
 import { formatDateTime } from '@/lib/utils';
+import Link from 'next/link';
 
 interface Appointment {
     id: string;
@@ -34,9 +34,6 @@ export default function AppointmentsPage() {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [statusFilter, setStatusFilter] = useState('ALL');
-    const [showForm, setShowForm] = useState(false);
-    const [patients, setPatients] = useState<Array<{ id: string; firstName: string; lastName: string; mrn: string; phone?: string }>>([]);
-    const [providers, setProviders] = useState<Array<{ id: string; firstName: string; lastName: string }>>([]);
 
     const loadAppointments = useCallback(async () => {
         if (!token) return;
@@ -54,35 +51,7 @@ export default function AppointmentsPage() {
         }
     }, [token, page, statusFilter]);
 
-    const loadFormData = useCallback(async () => {
-        if (!token) return;
-        try {
-            const [pRes] = await Promise.all([
-                patientApi.getAll('limit=100', token) as Promise<{ data: Array<{ id: string; firstName: string; lastName: string; mrn: string; phone?: string }> }>,
-            ]);
-            setPatients(pRes.data || []);
-
-            // Load providers (doctors) - we'll use a simple GET on users
-            try {
-                const dRes = await apiClient.get('/users?role=DOCTOR&limit=100', token) as { data: Array<{ id: string; firstName: string; lastName: string }> };
-                setProviders(dRes.data || []);
-            } catch {
-                // If /users endpoint doesn't exist, use empty array
-                setProviders([]);
-            }
-        } catch (err) {
-            console.error('Failed to load form data:', err);
-        }
-    }, [token]);
-
     useEffect(() => { loadAppointments(); }, [loadAppointments]);
-    useEffect(() => { loadFormData(); }, [loadFormData]);
-
-    const handleCreate = async (data: Record<string, unknown>) => {
-        await appointmentApi.create(data, token!);
-        setShowForm(false);
-        loadAppointments();
-    };
 
     const handleComplete = async (id: string) => {
         if (!confirm('Mark this appointment as completed?')) return;
@@ -151,14 +120,14 @@ export default function AppointmentsPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
-                    <p className="text-gray-500 mt-1">Schedule and manage appointments</p>
+                    <p className="text-gray-500 mt-1">View and manage all appointment records</p>
                 </div>
-                <button
-                    onClick={() => setShowForm(true)}
+                <Link
+                    href="/opd"
                     className="px-4 py-2.5 rounded-xl bg-teal-600 text-white font-medium text-sm hover:bg-teal-500 transition-colors shadow-sm shadow-teal-200"
                 >
                     + Book Appointment
-                </button>
+                </Link>
             </div>
 
             {/* Status Filters */}
@@ -185,14 +154,6 @@ export default function AppointmentsPage() {
                 totalPages={totalPages}
                 onPageChange={setPage}
                 emptyMessage="No appointments found."
-            />
-
-            <AppointmentFormModal
-                isOpen={showForm}
-                onClose={() => setShowForm(false)}
-                onSubmit={handleCreate}
-                patients={patients}
-                providers={providers}
             />
         </div>
     );

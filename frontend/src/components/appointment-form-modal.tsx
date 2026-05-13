@@ -33,11 +33,26 @@ export default function AppointmentFormModal({
     initialData,
     title = 'Book Appointment',
 }: AppointmentFormModalProps) {
+    // Default to current time rounded up to the next 15-minute slot
+    const getDefaultTime = () => {
+        const now = new Date();
+        const minutes = now.getMinutes();
+        const roundedMinutes = Math.ceil(minutes / 15) * 15;
+        const defaultDate = new Date(now);
+        defaultDate.setMinutes(roundedMinutes, 0, 0);
+        if (roundedMinutes >= 60) {
+            defaultDate.setHours(defaultDate.getHours() + 1, 0, 0, 0);
+        }
+        return defaultDate.toTimeString().slice(0, 5); // "HH:MM"
+    };
+
+    const getDefaultDate = () => new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+
     const [form, setForm] = useState<AppointmentFormData>({
         patientId: initialData?.patientId || '',
         providerId: initialData?.providerId || '',
-        appointmentDate: initialData?.appointmentDate || '',
-        appointmentTime: initialData?.appointmentTime || '09:00',
+        appointmentDate: initialData?.appointmentDate || getDefaultDate(),
+        appointmentTime: initialData?.appointmentTime || getDefaultTime(),
         durationMinutes: initialData?.durationMinutes || '30',
         reason: initialData?.reason || '',
         notes: initialData?.notes || '',

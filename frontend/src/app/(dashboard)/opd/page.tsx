@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {
     Activity,
     ArrowRight,
+    CalendarPlus,
     CheckCircle2,
     ClipboardList,
     Download,
@@ -14,8 +15,9 @@ import {
     Thermometer,
     Waves,
 } from 'lucide-react';
-import { appointmentApi } from '@/lib/api-client';
+import { appointmentApi, patientApi, apiClient } from '@/lib/api-client';
 import { useAuth } from '@/lib/auth-context';
+import AppointmentFormModal from '@/components/appointment-form-modal';
 
 interface Appointment {
     id: string;
@@ -67,6 +69,11 @@ export default function OpdPage() {
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const [dragOverActive, setDragOverActive] = useState(false);
 
+    // Appointment booking form state
+    const [showBookingForm, setShowBookingForm] = useState(false);
+    const [patients, setPatients] = useState<Array<{ id: string; firstName: string; lastName: string; mrn: string; phone?: string }>>([]);
+    const [providers, setProviders] = useState<Array<{ id: string; firstName: string; lastName: string }>>([]);
+
     const loadAppointments = useCallback(async () => {
         if (!token) return;
         setLoading(true);
@@ -85,9 +92,30 @@ export default function OpdPage() {
         }
     }, [token]);
 
+    const loadFormData = useCallback(async () => {
+        if (!token) return;
+        try {
+            const pRes = await patientApi.getAll('limit=100', token) as { data: Array<{ id: string; firstName: string; lastName: string; mrn: string; phone?: string }> };
+            setPatients(pRes.data || []);
+
+            try {
+                const dRes = await apiClient.get('/users?role=DOCTOR&limit=100', token) as { data: Array<{ id: string; firstName: string; lastName: string }> };
+                setProviders(dRes.data || []);
+            } catch {
+                setProviders([]);
+            }
+        } catch (err) {
+            console.error('Failed to load form data:', err);
+        }
+    }, [token]);
+
     useEffect(() => {
         loadAppointments();
     }, [loadAppointments]);
+
+    useEffect(() => {
+        loadFormData();
+    }, [loadFormData]);
 
     useEffect(() => {
         if (!startedAt) return;
@@ -144,6 +172,12 @@ export default function OpdPage() {
         await loadAppointments();
     };
 
+    const handleBookAppointment = async (data: Record<string, unknown>) => {
+        await appointmentApi.create(data, token!);
+        setShowBookingForm(false);
+        await loadAppointments();
+    };
+
     const duration = `${String(Math.floor(elapsedSeconds / 60)).padStart(2, '0')}:${String(elapsedSeconds % 60).padStart(2, '0')}`;
 
     return (
@@ -156,18 +190,27 @@ export default function OpdPage() {
                     </h1>
                     <p className="text-gray-500 mt-1">Manage doctor queues, active consultations, and completed OPD visits</p>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm min-w-28">
-                        <p className="text-xs text-gray-400 font-semibold uppercase">Waiting</p>
-                        <p className="text-2xl font-bold text-gray-900">{filteredWaiting.length}</p>
-                    </div>
-                    <div className="bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm min-w-28">
-                        <p className="text-xs text-gray-400 font-semibold uppercase">Active</p>
-                        <p className="text-2xl font-bold text-teal-600">{activeAppointment ? 1 : 0}</p>
-                    </div>
-                    <div className="bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm min-w-28">
-                        <p className="text-xs text-gray-400 font-semibold uppercase">Completed</p>
-                        <p className="text-2xl font-bold text-emerald-600">{filteredCompleted.length}</p>
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => setShowBookingForm(true)}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-600 text-white font-medium text-sm hover:bg-teal-500 transition-colors shadow-sm shadow-teal-200"
+                    >
+                        <CalendarPlus size={18} />
+                        Book Appointment
+                    </button>
+                    <div className="grid grid-cols-3 gap-3">
+                        <div className="bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm min-w-28">
+                            <p className="text-xs text-gray-400 font-semibold uppercase">Waiting</p>
+                            <p className="text-2xl font-bold text-gray-900">{filteredWaiting.length}</p>
+                        </div>
+                        <div className="bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm min-w-28">
+                            <p className="text-xs text-gray-400 font-semibold uppercase">Active</p>
+                            <p className="text-2xl font-bold text-teal-600">{activeAppointment ? 1 : 0}</p>
+                        </div>
+                        <div className="bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm min-w-28">
+                            <p className="text-xs text-gray-400 font-semibold uppercase">Completed</p>
+                            <p className="text-2xl font-bold text-emerald-600">{filteredCompleted.length}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -215,8 +258,15 @@ export default function OpdPage() {
                                 <div key={index} className="h-24 bg-white border border-gray-100 rounded-xl animate-pulse" />
                             ))
                         ) : filteredWaiting.length === 0 ? (
-                            <div className="h-64 bg-white border border-dashed border-gray-200 rounded-xl flex items-center justify-center text-gray-400">
-                                No patients waiting for this doctor
+                            <div className="h-64 bg-white border border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400 gap-3">
+                                <ClipboardList size={28} className="text-gray-300" />
+                                <p>No patients waiting</p>
+                                <button
+                                    onClick={() => setShowBookingForm(true)}
+                                    className="mt-1 text-sm text-teal-600 hover:text-teal-500 font-medium transition-colors"
+                                >
+                                    + Book an appointment
+                                </button>
                             </div>
                         ) : (
                             filteredWaiting.map((appointment) => {
@@ -423,6 +473,15 @@ export default function OpdPage() {
                     </table>
                 </div>
             </section>
+
+            {/* Appointment Booking Modal */}
+            <AppointmentFormModal
+                isOpen={showBookingForm}
+                onClose={() => setShowBookingForm(false)}
+                onSubmit={handleBookAppointment}
+                patients={patients}
+                providers={providers}
+            />
         </div>
     );
 }
