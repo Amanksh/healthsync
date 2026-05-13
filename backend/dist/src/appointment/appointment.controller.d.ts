@@ -35,6 +35,7 @@ export declare class AppointmentController {
                 id: string;
                 firstName: string;
                 lastName: string;
+                phone: string;
                 mrn: string;
             };
             provider: {
@@ -76,19 +77,13 @@ export declare class AppointmentController {
             city: string | null;
             state: string | null;
             zipCode: string | null;
-            mrn: string;
             dateOfBirth: Date;
             gender: import("@prisma/client").$Enums.Gender;
             emergencyContact: import("@prisma/client/runtime/library").JsonValue | null;
             bloodGroup: string | null;
             allergies: string | null;
+            mrn: string;
             deletedAt: Date | null;
-        };
-        provider: {
-            id: string;
-            email: string;
-            firstName: string;
-            lastName: string;
         };
         invoice: {
             id: string;
@@ -108,6 +103,12 @@ export declare class AppointmentController {
             s3Key: string | null;
             appointmentId: string;
         } | null;
+        provider: {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         id: string;
         createdAt: Date;

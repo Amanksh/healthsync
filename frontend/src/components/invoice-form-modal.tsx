@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Modal from './modal';
+import SearchableSelect, { SearchableOption } from './searchable-select';
 
 interface LineItem {
     description: string;
@@ -14,7 +15,7 @@ interface InvoiceFormModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (data: Record<string, unknown>) => Promise<void>;
-    appointments: Array<{ id: string; appointmentDate: string; patient: { id: string; firstName: string; lastName: string } }>;
+    appointments: Array<{ id: string; appointmentDate: string; reason?: string; patient: { id: string; firstName: string; lastName: string; phone?: string; mrn?: string } }>;
     title?: string;
 }
 
@@ -36,6 +37,33 @@ export default function InvoiceFormModal({
     ]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    // Build searchable options for appointments (searchable by patient name, phone, date, reason)
+    const appointmentOptions: SearchableOption[] = useMemo(
+        () =>
+            appointments.map((a) => {
+                const date = new Date(a.appointmentDate).toLocaleDateString('en-IN', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                });
+                const patientName = `${a.patient.firstName} ${a.patient.lastName}`;
+                return {
+                    value: a.id,
+                    label: patientName,
+                    sublabel: `${date}${a.reason ? ` · ${a.reason}` : ''}${a.patient.phone ? ` · ${a.patient.phone}` : ''}`,
+                    tags: [
+                        a.patient.firstName,
+                        a.patient.lastName,
+                        a.patient.phone || '',
+                        a.patient.mrn || '',
+                        date,
+                        a.reason || '',
+                    ],
+                };
+            }),
+        [appointments],
+    );
 
     const addItem = () => {
         setItems([...items, { description: '', category: 'OTHER', unitPrice: '', quantity: '1' }]);
@@ -113,14 +141,13 @@ export default function InvoiceFormModal({
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className={labelClass}>Appointment *</label>
-                        <select required value={appointmentId} onChange={(e) => setAppointmentId(e.target.value)} className={inputClass}>
-                            <option value="">Select appointment...</option>
-                            {appointments.map((a) => (
-                                <option key={a.id} value={a.id}>
-                                    {a.patient.firstName} {a.patient.lastName} — {new Date(a.appointmentDate).toLocaleDateString()}
-                                </option>
-                            ))}
-                        </select>
+                        <SearchableSelect
+                            options={appointmentOptions}
+                            value={appointmentId}
+                            onChange={setAppointmentId}
+                            placeholder="Search by patient name, phone, date..."
+                            required
+                        />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>

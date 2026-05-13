@@ -98,7 +98,7 @@ let AppointmentService = class AppointmentService {
                 orderBy: { [sortBy]: sortOrder },
                 include: {
                     patient: {
-                        select: { id: true, firstName: true, lastName: true, mrn: true },
+                        select: { id: true, firstName: true, lastName: true, mrn: true, phone: true },
                     },
                     provider: {
                         select: { id: true, firstName: true, lastName: true },

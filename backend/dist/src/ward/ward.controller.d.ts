@@ -35,8 +35,8 @@ export declare class WardController {
                     id: string;
                     firstName: string;
                     lastName: string;
-                    mrn: string;
                     gender: import("@prisma/client").$Enums.Gender;
+                    mrn: string;
                 };
                 attendingDoctor: {
                     id: string;
@@ -103,8 +103,8 @@ export declare class WardController {
                 id: string;
                 firstName: string;
                 lastName: string;
-                mrn: string;
                 gender: import("@prisma/client").$Enums.Gender;
+                mrn: string;
             };
             bed: {
                 id: string;
@@ -146,11 +146,11 @@ export declare class WardController {
             firstName: string;
             lastName: string;
             phone: string;
-            mrn: string;
             dateOfBirth: Date;
             gender: import("@prisma/client").$Enums.Gender;
             bloodGroup: string | null;
             allergies: string | null;
+            mrn: string;
         };
         bed: {
             id: string;
@@ -188,10 +188,10 @@ export declare class WardController {
                     firstName: string;
                     lastName: string;
                     phone: string;
-                    mrn: string;
                     dateOfBirth: Date;
                     gender: import("@prisma/client").$Enums.Gender;
                     bloodGroup: string | null;
+                    mrn: string;
                 };
                 attendingDoctor: {
                     id: string;
@@ -277,10 +277,10 @@ export declare class WardController {
                     firstName: string;
                     lastName: string;
                     phone: string;
-                    mrn: string;
                     dateOfBirth: Date;
                     gender: import("@prisma/client").$Enums.Gender;
                     bloodGroup: string | null;
+                    mrn: string;
                 };
                 attendingDoctor: {
                     id: string;
@@ -346,8 +346,8 @@ export declare class WardController {
             id: string;
             firstName: string;
             lastName: string;
-            mrn: string;
             gender: import("@prisma/client").$Enums.Gender;
+            mrn: string;
         };
         bed: {
             id: string;
@@ -377,8 +377,8 @@ export declare class WardController {
             id: string;
             firstName: string;
             lastName: string;
-            mrn: string;
             gender: import("@prisma/client").$Enums.Gender;
+            mrn: string;
         };
         bed: {
             id: string;

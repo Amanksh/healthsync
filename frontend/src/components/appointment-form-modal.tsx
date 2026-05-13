@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Modal from './modal';
+import SearchableSelect, { SearchableOption } from './searchable-select';
 
 interface AppointmentFormData {
     patientId: string;
@@ -17,7 +18,7 @@ interface AppointmentFormModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (data: Record<string, unknown>) => Promise<void>;
-    patients: Array<{ id: string; firstName: string; lastName: string; mrn: string }>;
+    patients: Array<{ id: string; firstName: string; lastName: string; mrn: string; phone?: string }>;
     providers: Array<{ id: string; firstName: string; lastName: string }>;
     initialData?: Record<string, string>;
     title?: string;
@@ -47,6 +48,29 @@ export default function AppointmentFormModal({
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
+
+    // Build searchable options for patients (searchable by name, phone, MRN)
+    const patientOptions: SearchableOption[] = useMemo(
+        () =>
+            patients.map((p) => ({
+                value: p.id,
+                label: `${p.firstName} ${p.lastName}`,
+                sublabel: `MRN: ${p.mrn}${p.phone ? ` · ${p.phone}` : ''}`,
+                tags: [p.mrn, p.phone || '', p.firstName, p.lastName],
+            })),
+        [patients],
+    );
+
+    // Build searchable options for doctors
+    const providerOptions: SearchableOption[] = useMemo(
+        () =>
+            providers.map((d) => ({
+                value: d.id,
+                label: `Dr. ${d.firstName} ${d.lastName}`,
+                tags: [d.firstName, d.lastName],
+            })),
+        [providers],
+    );
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -83,21 +107,23 @@ export default function AppointmentFormModal({
                 )}
                 <div>
                     <label className={labelClass}>Patient *</label>
-                    <select name="patientId" required value={form.patientId} onChange={handleChange} className={inputClass}>
-                        <option value="">Select patient...</option>
-                        {patients.map((p) => (
-                            <option key={p.id} value={p.id}>{p.firstName} {p.lastName} ({p.mrn})</option>
-                        ))}
-                    </select>
+                    <SearchableSelect
+                        options={patientOptions}
+                        value={form.patientId}
+                        onChange={(val) => setForm({ ...form, patientId: val })}
+                        placeholder="Search patient by name, phone, MRN..."
+                        required
+                    />
                 </div>
                 <div>
                     <label className={labelClass}>Doctor *</label>
-                    <select name="providerId" required value={form.providerId} onChange={handleChange} className={inputClass}>
-                        <option value="">Select doctor...</option>
-                        {providers.map((d) => (
-                            <option key={d.id} value={d.id}>Dr. {d.firstName} {d.lastName}</option>
-                        ))}
-                    </select>
+                    <SearchableSelect
+                        options={providerOptions}
+                        value={form.providerId}
+                        onChange={(val) => setForm({ ...form, providerId: val })}
+                        placeholder="Search doctor by name..."
+                        required
+                    />
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                     <div>

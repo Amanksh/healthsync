@@ -7,7 +7,11 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "deploy:start": "npx prisma migrate deploy && npm run seed:super-admin && node dist/main",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "prisma:generate": "prisma generate",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "seed:super-admin": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -86,6 +90,6 @@
     "testEnvironment": "node"
   },
   "prisma": {
-    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+    "seed": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts"
   }
 }

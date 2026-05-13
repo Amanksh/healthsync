@@ -120,12 +120,12 @@ export declare class BillingService {
             city: string | null;
             state: string | null;
             zipCode: string | null;
-            mrn: string;
             dateOfBirth: Date;
             gender: import("@prisma/client").$Enums.Gender;
             emergencyContact: import("@prisma/client/runtime/library").JsonValue | null;
             bloodGroup: string | null;
             allergies: string | null;
+            mrn: string;
             deletedAt: Date | null;
         };
         appointment: {

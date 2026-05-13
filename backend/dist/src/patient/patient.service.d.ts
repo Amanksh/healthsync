@@ -17,12 +17,12 @@ export declare class PatientService {
         city: string | null;
         state: string | null;
         zipCode: string | null;
-        mrn: string;
         dateOfBirth: Date;
         gender: import("@prisma/client").$Enums.Gender;
         emergencyContact: import("@prisma/client/runtime/library").JsonValue | null;
         bloodGroup: string | null;
         allergies: string | null;
+        mrn: string;
         deletedAt: Date | null;
     }>;
     findAll(params: {
@@ -44,12 +44,12 @@ export declare class PatientService {
             city: string | null;
             state: string | null;
             zipCode: string | null;
-            mrn: string;
             dateOfBirth: Date;
             gender: import("@prisma/client").$Enums.Gender;
             emergencyContact: import("@prisma/client/runtime/library").JsonValue | null;
             bloodGroup: string | null;
             allergies: string | null;
+            mrn: string;
             deletedAt: Date | null;
         }[];
         meta: {
@@ -110,12 +110,12 @@ export declare class PatientService {
         city: string | null;
         state: string | null;
         zipCode: string | null;
-        mrn: string;
         dateOfBirth: Date;
         gender: import("@prisma/client").$Enums.Gender;
         emergencyContact: import("@prisma/client/runtime/library").JsonValue | null;
         bloodGroup: string | null;
         allergies: string | null;
+        mrn: string;
         deletedAt: Date | null;
     }>;
     update(id: string, dto: UpdatePatientDto, hospitalId?: string): Promise<{
@@ -131,12 +131,12 @@ export declare class PatientService {
         city: string | null;
         state: string | null;
         zipCode: string | null;
-        mrn: string;
         dateOfBirth: Date;
         gender: import("@prisma/client").$Enums.Gender;
         emergencyContact: import("@prisma/client/runtime/library").JsonValue | null;
         bloodGroup: string | null;
         allergies: string | null;
+        mrn: string;
         deletedAt: Date | null;
     }>;
     softDelete(id: string, hospitalId?: string): Promise<{
@@ -152,12 +152,12 @@ export declare class PatientService {
         city: string | null;
         state: string | null;
         zipCode: string | null;
-        mrn: string;
         dateOfBirth: Date;
         gender: import("@prisma/client").$Enums.Gender;
         emergencyContact: import("@prisma/client/runtime/library").JsonValue | null;
         bloodGroup: string | null;
         allergies: string | null;
+        mrn: string;
         deletedAt: Date | null;
     }>;
 }

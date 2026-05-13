@@ -35,7 +35,7 @@ export default function AppointmentsPage() {
     const [totalPages, setTotalPages] = useState(1);
     const [statusFilter, setStatusFilter] = useState('ALL');
     const [showForm, setShowForm] = useState(false);
-    const [patients, setPatients] = useState<Array<{ id: string; firstName: string; lastName: string; mrn: string }>>([]);
+    const [patients, setPatients] = useState<Array<{ id: string; firstName: string; lastName: string; mrn: string; phone?: string }>>([]);
     const [providers, setProviders] = useState<Array<{ id: string; firstName: string; lastName: string }>>([]);
 
     const loadAppointments = useCallback(async () => {
@@ -58,7 +58,7 @@ export default function AppointmentsPage() {
         if (!token) return;
         try {
             const [pRes] = await Promise.all([
-                patientApi.getAll('limit=100', token) as Promise<{ data: Array<{ id: string; firstName: string; lastName: string; mrn: string }> }>,
+                patientApi.getAll('limit=100', token) as Promise<{ data: Array<{ id: string; firstName: string; lastName: string; mrn: string; phone?: string }> }>,
             ]);
             setPatients(pRes.data || []);
 

@@ -39,7 +39,7 @@ export default function BillingPage() {
     const [totalPages, setTotalPages] = useState(1);
     const [statusFilter, setStatusFilter] = useState('ALL');
     const [showForm, setShowForm] = useState(false);
-    const [appointments, setAppointments] = useState<Array<{ id: string; appointmentDate: string; patient: { id: string; firstName: string; lastName: string } }>>([]);
+    const [appointments, setAppointments] = useState<Array<{ id: string; appointmentDate: string; reason?: string; patient: { id: string; firstName: string; lastName: string; phone?: string; mrn?: string } }>>([]);
 
     const loadInvoices = useCallback(async () => {
         if (!token) return;
@@ -60,7 +60,7 @@ export default function BillingPage() {
     const loadAppointments = useCallback(async () => {
         if (!token) return;
         try {
-            const res = await appointmentApi.getAll('limit=100&status=COMPLETED&sortBy=createdAt&sortOrder=desc', token) as { data: Array<{ id: string; appointmentDate: string; patient: { id: string; firstName: string; lastName: string } }> };
+            const res = await appointmentApi.getAll('limit=100&status=COMPLETED&sortBy=createdAt&sortOrder=desc', token) as { data: Array<{ id: string; appointmentDate: string; reason?: string; patient: { id: string; firstName: string; lastName: string; phone?: string; mrn?: string } }> };
             setAppointments(res.data || []);
         } catch (err) {
             console.error('Failed to load appointments:', err);
