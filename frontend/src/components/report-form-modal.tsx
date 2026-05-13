@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Modal from './modal';
+import SearchableSelect, { SearchableOption } from './searchable-select';
 import { ReportType } from '@/lib/api-client';
 
 interface PatientOption {
@@ -36,6 +37,16 @@ export default function ReportFormModal({ isOpen, onClose, onSubmit, patients }:
     const [file, setFile] = useState<File | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
+
+    const patientOptions = useMemo<SearchableOption[]>(
+        () => patients.map((patient) => ({
+            value: patient.id,
+            label: `${patient.firstName} ${patient.lastName}`,
+            sublabel: `MRN: ${patient.mrn}${patient.phone ? ` · ${patient.phone}` : ''}`,
+            tags: [patient.firstName, patient.lastName, patient.mrn, patient.phone].filter(Boolean),
+        })),
+        [patients],
+    );
 
     const reset = () => {
         setPatientId('');
@@ -91,19 +102,14 @@ export default function ReportFormModal({ isOpen, onClose, onSubmit, patients }:
 
                 <div>
                     <label className={labelClass}>Patient *</label>
-                    <select
+                    <SearchableSelect
                         required
+                        options={patientOptions}
                         value={patientId}
-                        onChange={(e) => setPatientId(e.target.value)}
-                        className={inputClass}
-                    >
-                        <option value="">Select patient</option>
-                        {patients.map((patient) => (
-                            <option key={patient.id} value={patient.id}>
-                                {patient.firstName} {patient.lastName} ({patient.mrn})
-                            </option>
-                        ))}
-                    </select>
+                        onChange={setPatientId}
+                        placeholder="Search by name, phone, MRN..."
+                        noResultsText="No matching patients"
+                    />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
