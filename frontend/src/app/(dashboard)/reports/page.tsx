@@ -11,12 +11,14 @@ import {
     ExternalLink,
     FileText,
     HeartPulse,
+    LayoutGrid,
     Loader2,
     Plus,
     RadioTower,
     Radiation,
     Search,
     Send,
+    User,
 } from 'lucide-react';
 import ReportFormModal from '@/components/report-form-modal';
 import ReportDetailPanel from '@/components/report-detail-panel';
@@ -125,6 +127,7 @@ export default function ReportsPage() {
     const [type, setType] = useState<ReportTypeFilter>('ALL');
     const [showForm, setShowForm] = useState(false);
     const [selectedReport, setSelectedReport] = useState<MedicalReport | null>(null);
+    const [viewMode, setViewMode] = useState<'patient' | 'flat'>('patient');
 
     const loadReports = useCallback(async () => {
         if (!token) return;
@@ -184,6 +187,26 @@ export default function ReportsPage() {
         }, 350);
         return () => clearTimeout(timer);
     }, [searchInput]);
+
+    const groupedReports = useMemo(() => {
+        const groups: Record<string, {
+            patient: { id: string; firstName: string; lastName: string; mrn: string; phone: string };
+            reports: MedicalReport[];
+        }> = {};
+
+        reports.forEach((report) => {
+            const patientId = report.patient.id;
+            if (!groups[patientId]) {
+                groups[patientId] = {
+                    patient: report.patient,
+                    reports: [],
+                };
+            }
+            groups[patientId].reports.push(report);
+        });
+
+        return Object.values(groups);
+    }, [reports]);
 
     const stats = useMemo(() => {
         const pendingDelivery = allReports.filter((report) => report.deliveryStatus === 'NOT_SENT').length;
@@ -343,17 +366,43 @@ export default function ReportsPage() {
             </div>
 
             <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-                <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
+                <div className="px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <p className="font-semibold text-gray-900">Report Library</p>
                         <p className="text-xs text-gray-400 mt-0.5">{totalCount} reports matching current filters</p>
                     </div>
-                    {loading && (
-                        <span className="inline-flex items-center gap-2 text-xs font-medium text-gray-400">
-                            <Loader2 className="animate-spin" size={14} />
-                            Loading
-                        </span>
-                    )}
+                    <div className="flex items-center gap-3 flex-wrap">
+                        {loading && (
+                            <span className="inline-flex items-center gap-2 text-xs font-medium text-gray-400 mr-2">
+                                <Loader2 className="animate-spin" size={14} />
+                                Loading
+                            </span>
+                        )}
+                        <div className="flex items-center gap-1 bg-gray-100/80 p-1 rounded-xl">
+                            <button
+                                onClick={() => setViewMode('patient')}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                    viewMode === 'patient'
+                                        ? 'bg-white text-teal-700 shadow-sm border border-gray-200/40'
+                                        : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                            >
+                                <User size={13} />
+                                Group by Patient
+                            </button>
+                            <button
+                                onClick={() => setViewMode('flat')}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                    viewMode === 'flat'
+                                        ? 'bg-white text-teal-700 shadow-sm border border-gray-200/40'
+                                        : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                            >
+                                <LayoutGrid size={13} />
+                                All Reports Grid
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 {loading ? (
@@ -367,6 +416,145 @@ export default function ReportsPage() {
                         <FileText className="mx-auto text-gray-200" size={44} />
                         <p className="mt-3 font-medium text-gray-700">No reports found</p>
                         <p className="text-sm text-gray-400 mt-1">Try another report type, search term, or add a new report.</p>
+                    </div>
+                ) : viewMode === 'patient' ? (
+                    <div className="p-5 space-y-6">
+                        {groupedReports.map(({ patient, reports: patientReports }) => {
+                            const patientName = `${patient.firstName} ${patient.lastName}`;
+                            const total = patientReports.length;
+                            const sent = patientReports.filter(r => r.deliveryStatus === 'SENT').length;
+                            const pending = patientReports.filter(r => r.deliveryStatus === 'NOT_SENT').length;
+                            const failed = patientReports.filter(r => r.deliveryStatus === 'FAILED').length;
+
+                            return (
+                                <div key={patient.id} className="border border-gray-100 rounded-2xl bg-white shadow-sm overflow-hidden hover:border-teal-50 transition-all">
+                                    {/* Patient Info Banner */}
+                                    <div className="bg-gray-50/50 px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-full bg-teal-50 flex items-center justify-center text-teal-600 font-bold shrink-0">
+                                                {patient.firstName[0]}{patient.lastName[0]}
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <h3 className="font-semibold text-gray-900 text-base">{patientName}</h3>
+                                                    <span className="font-mono text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-100/50 rounded px-1.5 py-0.5">
+                                                        MRN: {patient.mrn}
+                                                    </span>
+                                                </div>
+                                                {patient.phone && (
+                                                    <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                                                        <span className="opacity-60">Phone:</span> {patient.phone}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        {/* Patient summary counts */}
+                                        <div className="flex gap-2 flex-wrap text-[11px] font-bold uppercase">
+                                            <span className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200/50">
+                                                {total} {total === 1 ? 'Report' : 'Reports'}
+                                            </span>
+                                            {sent > 0 && (
+                                                <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                                    {sent} Sent
+                                                </span>
+                                            )}
+                                            {pending > 0 && (
+                                                <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
+                                                    {pending} Pending
+                                                </span>
+                                            )}
+                                            {failed > 0 && (
+                                                <span className="px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-100">
+                                                    {failed} Failed
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Patient's Reports List */}
+                                    <div className="divide-y divide-gray-100">
+                                        {patientReports.map((report) => {
+                                            const typeInfo = reportTypeConfig[report.type];
+                                            const delivery = deliveryStyles[report.deliveryStatus];
+                                            const TypeIcon = typeInfo.Icon;
+
+                                            return (
+                                                <div
+                                                    key={report.id}
+                                                    onClick={() => handleViewReport(report)}
+                                                    className="group flex flex-col md:flex-row md:items-center justify-between p-4 gap-4 hover:bg-teal-50/10 cursor-pointer transition-colors"
+                                                >
+                                                    <div className="flex items-center gap-3 min-w-0">
+                                                        <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${typeInfo.iconClass}`}>
+                                                            <TypeIcon size={16} />
+                                                        </span>
+                                                        <div className="min-w-0">
+                                                            <h4 className="text-sm font-semibold text-gray-900 truncate group-hover:text-teal-700 transition-colors">
+                                                                {report.title}
+                                                            </h4>
+                                                            <div className="flex items-center gap-2 mt-1 flex-wrap text-xs text-gray-400">
+                                                                <span className={`font-medium uppercase text-[10px] tracking-wide rounded px-1.5 py-0.5 border ${typeInfo.badgeClass}`}>
+                                                                    {typeInfo.shortLabel}
+                                                                </span>
+                                                                <span>·</span>
+                                                                <span>Date: {formatDate(report.reportDate)}</span>
+                                                                {report.deliveredAt && (
+                                                                    <>
+                                                                        <span>·</span>
+                                                                        <span className="text-emerald-600">Sent on: {formatDate(report.deliveredAt)}</span>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between md:justify-end gap-3 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                                        {/* Delivery Status Badge */}
+                                                        <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase ${delivery.badge}`}>
+                                                            <span className={`h-1.5 w-1.5 rounded-full ${delivery.dot}`} />
+                                                            {report.deliveryStatus === 'NOT_SENT' ? 'Pending' : delivery.label}
+                                                        </span>
+
+                                                        {/* Action Buttons */}
+                                                        <div className="flex items-center gap-1.5">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleViewReport(report)}
+                                                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+                                                                title="View Details"
+                                                            >
+                                                                <ExternalLink size={13} />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleSend(report)}
+                                                                disabled={sendingId === report.id}
+                                                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-emerald-200 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 disabled:opacity-40 transition-colors"
+                                                                title="Send to Patient"
+                                                            >
+                                                                {sendingId === report.id ? (
+                                                                    <Loader2 className="animate-spin" size={13} />
+                                                                ) : (
+                                                                    <Send size={13} />
+                                                                )}
+                                                            </button>
+                                                            <a
+                                                                href={report.fileUrl}
+                                                                download
+                                                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+                                                                title="Download File"
+                                                            >
+                                                                <Download size={13} />
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="grid gap-4 p-5 md:grid-cols-2 2xl:grid-cols-3">
