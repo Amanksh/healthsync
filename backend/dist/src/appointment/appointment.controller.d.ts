@@ -22,12 +22,12 @@ export declare class AppointmentController {
         updatedAt: Date;
         hospitalId: string;
         appointmentDate: Date;
-        durationMinutes: number;
-        status: import("@prisma/client").$Enums.AppointmentStatus;
-        reason: string | null;
-        notes: string | null;
         patientId: string;
         providerId: string;
+        durationMinutes: number;
+        reason: string | null;
+        notes: string | null;
+        status: import("@prisma/client").$Enums.AppointmentStatus;
     }>;
     findAll(page?: string, limit?: string, status?: AppointmentStatus, providerId?: string, patientId?: string, dateFrom?: string, dateTo?: string, sortBy?: string, sortOrder?: 'asc' | 'desc', req?: any): Promise<{
         data: ({
@@ -49,12 +49,12 @@ export declare class AppointmentController {
             updatedAt: Date;
             hospitalId: string;
             appointmentDate: Date;
-            durationMinutes: number;
-            status: import("@prisma/client").$Enums.AppointmentStatus;
-            reason: string | null;
-            notes: string | null;
             patientId: string;
             providerId: string;
+            durationMinutes: number;
+            reason: string | null;
+            notes: string | null;
+            status: import("@prisma/client").$Enums.AppointmentStatus;
         })[];
         meta: {
             total: number;
@@ -90,18 +90,18 @@ export declare class AppointmentController {
             createdAt: Date;
             updatedAt: Date;
             hospitalId: string;
-            notes: string | null;
             patientId: string;
+            notes: string | null;
+            appointmentId: string;
+            taxRate: import("@prisma/client/runtime/library").Decimal;
+            discountCents: number;
+            paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
             invoiceNumber: string;
             subtotalCents: number;
-            taxRate: import("@prisma/client/runtime/library").Decimal;
             taxAmountCents: number;
-            discountCents: number;
             totalCents: number;
-            paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
             pdfUrl: string | null;
             s3Key: string | null;
-            appointmentId: string;
         } | null;
         provider: {
             id: string;
@@ -115,12 +115,12 @@ export declare class AppointmentController {
         updatedAt: Date;
         hospitalId: string;
         appointmentDate: Date;
-        durationMinutes: number;
-        status: import("@prisma/client").$Enums.AppointmentStatus;
-        reason: string | null;
-        notes: string | null;
         patientId: string;
         providerId: string;
+        durationMinutes: number;
+        reason: string | null;
+        notes: string | null;
+        status: import("@prisma/client").$Enums.AppointmentStatus;
     }>;
     update(id: string, dto: UpdateAppointmentDto, req: any): Promise<{
         patient: {
@@ -140,12 +140,12 @@ export declare class AppointmentController {
         updatedAt: Date;
         hospitalId: string;
         appointmentDate: Date;
-        durationMinutes: number;
-        status: import("@prisma/client").$Enums.AppointmentStatus;
-        reason: string | null;
-        notes: string | null;
         patientId: string;
         providerId: string;
+        durationMinutes: number;
+        reason: string | null;
+        notes: string | null;
+        status: import("@prisma/client").$Enums.AppointmentStatus;
     }>;
     cancel(id: string, req: any): Promise<{
         id: string;
@@ -153,11 +153,11 @@ export declare class AppointmentController {
         updatedAt: Date;
         hospitalId: string;
         appointmentDate: Date;
-        durationMinutes: number;
-        status: import("@prisma/client").$Enums.AppointmentStatus;
-        reason: string | null;
-        notes: string | null;
         patientId: string;
         providerId: string;
+        durationMinutes: number;
+        reason: string | null;
+        notes: string | null;
+        status: import("@prisma/client").$Enums.AppointmentStatus;
     }>;
 }

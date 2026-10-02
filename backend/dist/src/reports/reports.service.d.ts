@@ -30,8 +30,8 @@ export declare class ReportsService {
         createdAt: Date;
         updatedAt: Date;
         hospitalId: string;
-        notes: string | null;
         patientId: string;
+        notes: string | null;
         s3Key: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ReportType;
@@ -73,8 +73,8 @@ export declare class ReportsService {
             createdAt: Date;
             updatedAt: Date;
             hospitalId: string;
-            notes: string | null;
             patientId: string;
+            notes: string | null;
             s3Key: string | null;
             title: string;
             type: import("@prisma/client").$Enums.ReportType;
@@ -115,8 +115,8 @@ export declare class ReportsService {
         createdAt: Date;
         updatedAt: Date;
         hospitalId: string;
-        notes: string | null;
         patientId: string;
+        notes: string | null;
         s3Key: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ReportType;
@@ -150,8 +150,8 @@ export declare class ReportsService {
         createdAt: Date;
         updatedAt: Date;
         hospitalId: string;
-        notes: string | null;
         patientId: string;
+        notes: string | null;
         s3Key: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ReportType;

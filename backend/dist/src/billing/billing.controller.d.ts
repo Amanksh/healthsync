@@ -17,12 +17,12 @@ export declare class BillingController {
         };
         items: {
             id: string;
-            totalCents: number;
             description: string;
             category: import("@prisma/client").$Enums.InvoiceItemCategory;
             unitPriceCents: number;
             quantity: number;
             medicineId: string | null;
+            totalCents: number;
             invoiceId: string;
         }[];
     } & {
@@ -30,18 +30,18 @@ export declare class BillingController {
         createdAt: Date;
         updatedAt: Date;
         hospitalId: string;
-        notes: string | null;
         patientId: string;
+        notes: string | null;
+        appointmentId: string;
+        taxRate: import("@prisma/client/runtime/library").Decimal;
+        discountCents: number;
+        paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         invoiceNumber: string;
         subtotalCents: number;
-        taxRate: import("@prisma/client/runtime/library").Decimal;
         taxAmountCents: number;
-        discountCents: number;
         totalCents: number;
-        paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         pdfUrl: string | null;
         s3Key: string | null;
-        appointmentId: string;
     }>;
     findAll(page?: string, limit?: string, paymentStatus?: string, search?: string, req?: any): Promise<{
         data: ({
@@ -57,12 +57,12 @@ export declare class BillingController {
             };
             items: {
                 id: string;
-                totalCents: number;
                 description: string;
                 category: import("@prisma/client").$Enums.InvoiceItemCategory;
                 unitPriceCents: number;
                 quantity: number;
                 medicineId: string | null;
+                totalCents: number;
                 invoiceId: string;
             }[];
         } & {
@@ -70,18 +70,18 @@ export declare class BillingController {
             createdAt: Date;
             updatedAt: Date;
             hospitalId: string;
-            notes: string | null;
             patientId: string;
+            notes: string | null;
+            appointmentId: string;
+            taxRate: import("@prisma/client/runtime/library").Decimal;
+            discountCents: number;
+            paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
             invoiceNumber: string;
             subtotalCents: number;
-            taxRate: import("@prisma/client/runtime/library").Decimal;
             taxAmountCents: number;
-            discountCents: number;
             totalCents: number;
-            paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
             pdfUrl: string | null;
             s3Key: string | null;
-            appointmentId: string;
         })[];
         meta: {
             total: number;
@@ -124,21 +124,21 @@ export declare class BillingController {
             updatedAt: Date;
             hospitalId: string;
             appointmentDate: Date;
-            durationMinutes: number;
-            status: import("@prisma/client").$Enums.AppointmentStatus;
-            reason: string | null;
-            notes: string | null;
             patientId: string;
             providerId: string;
+            durationMinutes: number;
+            reason: string | null;
+            notes: string | null;
+            status: import("@prisma/client").$Enums.AppointmentStatus;
         };
         items: {
             id: string;
-            totalCents: number;
             description: string;
             category: import("@prisma/client").$Enums.InvoiceItemCategory;
             unitPriceCents: number;
             quantity: number;
             medicineId: string | null;
+            totalCents: number;
             invoiceId: string;
         }[];
     } & {
@@ -146,18 +146,18 @@ export declare class BillingController {
         createdAt: Date;
         updatedAt: Date;
         hospitalId: string;
-        notes: string | null;
         patientId: string;
+        notes: string | null;
+        appointmentId: string;
+        taxRate: import("@prisma/client/runtime/library").Decimal;
+        discountCents: number;
+        paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         invoiceNumber: string;
         subtotalCents: number;
-        taxRate: import("@prisma/client/runtime/library").Decimal;
         taxAmountCents: number;
-        discountCents: number;
         totalCents: number;
-        paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         pdfUrl: string | null;
         s3Key: string | null;
-        appointmentId: string;
     }>;
     update(id: string, dto: UpdateInvoiceDto, req: any): Promise<{
         patient: {
@@ -173,12 +173,12 @@ export declare class BillingController {
         };
         items: {
             id: string;
-            totalCents: number;
             description: string;
             category: import("@prisma/client").$Enums.InvoiceItemCategory;
             unitPriceCents: number;
             quantity: number;
             medicineId: string | null;
+            totalCents: number;
             invoiceId: string;
         }[];
     } & {
@@ -186,17 +186,17 @@ export declare class BillingController {
         createdAt: Date;
         updatedAt: Date;
         hospitalId: string;
-        notes: string | null;
         patientId: string;
+        notes: string | null;
+        appointmentId: string;
+        taxRate: import("@prisma/client/runtime/library").Decimal;
+        discountCents: number;
+        paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         invoiceNumber: string;
         subtotalCents: number;
-        taxRate: import("@prisma/client/runtime/library").Decimal;
         taxAmountCents: number;
-        discountCents: number;
         totalCents: number;
-        paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
         pdfUrl: string | null;
         s3Key: string | null;
-        appointmentId: string;
     }>;
 }
