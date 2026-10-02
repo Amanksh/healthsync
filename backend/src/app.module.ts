@@ -12,6 +12,7 @@ import { UploadModule } from './upload/upload.module';
 import { PharmacyModule } from './pharmacy/pharmacy.module';
 import { ReportsModule } from './reports/reports.module';
 import { WardModule } from './ward/ward.module';
+import { WhatsAppModule } from './whatsapp/whatsapp.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { WardModule } from './ward/ward.module';
     PharmacyModule,
     ReportsModule,
     WardModule,
+    WhatsAppModule,
   ],
 })
 export class AppModule { }

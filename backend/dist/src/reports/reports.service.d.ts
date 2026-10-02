@@ -2,23 +2,26 @@ import { ConfigService } from '@nestjs/config';
 import { ReportType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { UploadService } from '../upload/upload.service';
+import { WhatsAppService } from '../whatsapp/whatsapp.service';
 import { CreateReportDto } from './dto';
 export declare class ReportsService {
     private prisma;
     private uploadService;
     private configService;
-    constructor(prisma: PrismaService, uploadService: UploadService, configService: ConfigService);
+    private whatsAppService;
+    private readonly logger;
+    constructor(prisma: PrismaService, uploadService: UploadService, configService: ConfigService, whatsAppService: WhatsAppService);
     create(dto: CreateReportDto, file: any, hospitalId?: string, uploadedById?: string): Promise<{
-        hospital: {
-            id: string;
-            name: string;
-        };
         patient: {
             id: string;
+            mrn: string;
             firstName: string;
             lastName: string;
             phone: string;
-            mrn: string;
+        };
+        hospital: {
+            id: string;
+            name: string;
         };
         uploadedBy: {
             id: string;
@@ -30,17 +33,17 @@ export declare class ReportsService {
         createdAt: Date;
         updatedAt: Date;
         hospitalId: string;
-        patientId: string;
-        notes: string | null;
-        s3Key: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ReportType;
         reportDate: Date;
+        notes: string | null;
         fileUrl: string;
+        s3Key: string | null;
         aiSummary: string | null;
         deliveryStatus: import("@prisma/client").$Enums.ReportDeliveryStatus;
         deliveredAt: Date | null;
         deliveryError: string | null;
+        patientId: string;
         uploadedById: string | null;
     }>;
     findAll(params: {
@@ -52,16 +55,16 @@ export declare class ReportsService {
         hospitalId?: string | null;
     }): Promise<{
         data: ({
-            hospital: {
-                id: string;
-                name: string;
-            };
             patient: {
                 id: string;
+                mrn: string;
                 firstName: string;
                 lastName: string;
                 phone: string;
-                mrn: string;
+            };
+            hospital: {
+                id: string;
+                name: string;
             };
             uploadedBy: {
                 id: string;
@@ -73,17 +76,17 @@ export declare class ReportsService {
             createdAt: Date;
             updatedAt: Date;
             hospitalId: string;
-            patientId: string;
-            notes: string | null;
-            s3Key: string | null;
             title: string;
             type: import("@prisma/client").$Enums.ReportType;
             reportDate: Date;
+            notes: string | null;
             fileUrl: string;
+            s3Key: string | null;
             aiSummary: string | null;
             deliveryStatus: import("@prisma/client").$Enums.ReportDeliveryStatus;
             deliveredAt: Date | null;
             deliveryError: string | null;
+            patientId: string;
             uploadedById: string | null;
         })[];
         meta: {
@@ -94,16 +97,16 @@ export declare class ReportsService {
         };
     }>;
     findOne(id: string, hospitalId?: string | null): Promise<{
-        hospital: {
-            id: string;
-            name: string;
-        };
         patient: {
             id: string;
+            mrn: string;
             firstName: string;
             lastName: string;
             phone: string;
-            mrn: string;
+        };
+        hospital: {
+            id: string;
+            name: string;
         };
         uploadedBy: {
             id: string;
@@ -115,30 +118,30 @@ export declare class ReportsService {
         createdAt: Date;
         updatedAt: Date;
         hospitalId: string;
-        patientId: string;
-        notes: string | null;
-        s3Key: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ReportType;
         reportDate: Date;
+        notes: string | null;
         fileUrl: string;
+        s3Key: string | null;
         aiSummary: string | null;
         deliveryStatus: import("@prisma/client").$Enums.ReportDeliveryStatus;
         deliveredAt: Date | null;
         deliveryError: string | null;
+        patientId: string;
         uploadedById: string | null;
     }>;
     sendToPatient(id: string, hospitalId?: string | null): Promise<{
-        hospital: {
-            id: string;
-            name: string;
-        };
         patient: {
             id: string;
+            mrn: string;
             firstName: string;
             lastName: string;
             phone: string;
-            mrn: string;
+        };
+        hospital: {
+            id: string;
+            name: string;
         };
         uploadedBy: {
             id: string;
@@ -150,17 +153,17 @@ export declare class ReportsService {
         createdAt: Date;
         updatedAt: Date;
         hospitalId: string;
-        patientId: string;
-        notes: string | null;
-        s3Key: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ReportType;
         reportDate: Date;
+        notes: string | null;
         fileUrl: string;
+        s3Key: string | null;
         aiSummary: string | null;
         deliveryStatus: import("@prisma/client").$Enums.ReportDeliveryStatus;
         deliveredAt: Date | null;
         deliveryError: string | null;
+        patientId: string;
         uploadedById: string | null;
     }>;
     private buildPatientMessage;

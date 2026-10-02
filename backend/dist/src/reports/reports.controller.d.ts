@@ -5,16 +5,16 @@ export declare class ReportsController {
     private reportsService;
     constructor(reportsService: ReportsService);
     create(dto: CreateReportDto, file: any, req: any): Promise<{
-        hospital: {
-            id: string;
-            name: string;
-        };
         patient: {
             id: string;
+            mrn: string;
             firstName: string;
             lastName: string;
             phone: string;
-            mrn: string;
+        };
+        hospital: {
+            id: string;
+            name: string;
         };
         uploadedBy: {
             id: string;
@@ -26,31 +26,31 @@ export declare class ReportsController {
         createdAt: Date;
         updatedAt: Date;
         hospitalId: string;
-        patientId: string;
-        notes: string | null;
-        s3Key: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ReportType;
         reportDate: Date;
+        notes: string | null;
         fileUrl: string;
+        s3Key: string | null;
         aiSummary: string | null;
         deliveryStatus: import("@prisma/client").$Enums.ReportDeliveryStatus;
         deliveredAt: Date | null;
         deliveryError: string | null;
+        patientId: string;
         uploadedById: string | null;
     }>;
     findAll(page?: string, limit?: string, search?: string, type?: ReportType, patientId?: string, req?: any): Promise<{
         data: ({
-            hospital: {
-                id: string;
-                name: string;
-            };
             patient: {
                 id: string;
+                mrn: string;
                 firstName: string;
                 lastName: string;
                 phone: string;
-                mrn: string;
+            };
+            hospital: {
+                id: string;
+                name: string;
             };
             uploadedBy: {
                 id: string;
@@ -62,17 +62,17 @@ export declare class ReportsController {
             createdAt: Date;
             updatedAt: Date;
             hospitalId: string;
-            patientId: string;
-            notes: string | null;
-            s3Key: string | null;
             title: string;
             type: import("@prisma/client").$Enums.ReportType;
             reportDate: Date;
+            notes: string | null;
             fileUrl: string;
+            s3Key: string | null;
             aiSummary: string | null;
             deliveryStatus: import("@prisma/client").$Enums.ReportDeliveryStatus;
             deliveredAt: Date | null;
             deliveryError: string | null;
+            patientId: string;
             uploadedById: string | null;
         })[];
         meta: {
@@ -83,16 +83,16 @@ export declare class ReportsController {
         };
     }>;
     findOne(id: string, req: any): Promise<{
-        hospital: {
-            id: string;
-            name: string;
-        };
         patient: {
             id: string;
+            mrn: string;
             firstName: string;
             lastName: string;
             phone: string;
-            mrn: string;
+        };
+        hospital: {
+            id: string;
+            name: string;
         };
         uploadedBy: {
             id: string;
@@ -104,30 +104,30 @@ export declare class ReportsController {
         createdAt: Date;
         updatedAt: Date;
         hospitalId: string;
-        patientId: string;
-        notes: string | null;
-        s3Key: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ReportType;
         reportDate: Date;
+        notes: string | null;
         fileUrl: string;
+        s3Key: string | null;
         aiSummary: string | null;
         deliveryStatus: import("@prisma/client").$Enums.ReportDeliveryStatus;
         deliveredAt: Date | null;
         deliveryError: string | null;
+        patientId: string;
         uploadedById: string | null;
     }>;
     send(id: string, req: any): Promise<{
-        hospital: {
-            id: string;
-            name: string;
-        };
         patient: {
             id: string;
+            mrn: string;
             firstName: string;
             lastName: string;
             phone: string;
-            mrn: string;
+        };
+        hospital: {
+            id: string;
+            name: string;
         };
         uploadedBy: {
             id: string;
@@ -139,17 +139,17 @@ export declare class ReportsController {
         createdAt: Date;
         updatedAt: Date;
         hospitalId: string;
-        patientId: string;
-        notes: string | null;
-        s3Key: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ReportType;
         reportDate: Date;
+        notes: string | null;
         fileUrl: string;
+        s3Key: string | null;
         aiSummary: string | null;
         deliveryStatus: import("@prisma/client").$Enums.ReportDeliveryStatus;
         deliveredAt: Date | null;
         deliveryError: string | null;
+        patientId: string;
         uploadedById: string | null;
     }>;
 }

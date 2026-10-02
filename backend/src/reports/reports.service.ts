@@ -2,6 +2,7 @@ import {
     BadRequestException,
     ForbiddenException,
     Injectable,
+    Logger,
     NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -9,6 +10,7 @@ import { randomBytes } from 'crypto';
 import { ReportDeliveryStatus, ReportType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { UploadService } from '../upload/upload.service';
+import { WhatsAppService } from '../whatsapp/whatsapp.service';
 import { CreateReportDto } from './dto';
 
 const REPORT_TYPE_LABELS: Record<ReportType, string> = {
@@ -21,10 +23,13 @@ const REPORT_TYPE_LABELS: Record<ReportType, string> = {
 
 @Injectable()
 export class ReportsService {
+    private readonly logger = new Logger(ReportsService.name);
+
     constructor(
         private prisma: PrismaService,
         private uploadService: UploadService,
         private configService: ConfigService,
+        private whatsAppService: WhatsAppService,
     ) { }
 
     async create(dto: CreateReportDto, file: any, hospitalId?: string, uploadedById?: string) {
@@ -138,45 +143,39 @@ export class ReportsService {
         }
 
         const message = this.buildPatientMessage(report);
-        const webhookUrl = this.configService.get<string>('REPORT_MESSAGE_WEBHOOK_URL');
 
         try {
-            if (webhookUrl) {
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        to: report.patient.phone,
-                        patientId: report.patient.id,
-                        reportId: report.id,
-                        reportType: report.type,
-                        fileUrl: report.fileUrl,
-                        message,
-                    }),
-                });
+            const result = await this.whatsAppService.sendMessage(
+                report.patient.phone,
+                message,
+                report.fileUrl,
+            );
 
-                if (!response.ok) {
-                    throw new Error(`Messaging provider returned ${response.status}`);
-                }
-            }
-
-            const deliveryError = webhookUrl ? null : 'Dry run: REPORT_MESSAGE_WEBHOOK_URL is not configured';
+            this.logger.log(
+                `Report ${id} sent to ${report.patient.phone} — SID: ${result.sid}`,
+            );
 
             return this.prisma.medicalReport.update({
                 where: { id },
                 data: {
                     deliveryStatus: ReportDeliveryStatus.SENT,
                     deliveredAt: new Date(),
-                    deliveryError,
+                    deliveryError: result.status === 'skipped'
+                        ? 'Dry run: Twilio credentials not configured'
+                        : null,
                 },
                 include: this.defaultInclude(),
             });
         } catch (error) {
+            this.logger.error(
+                `Failed to send report ${id} to ${report.patient.phone}: ${error}`,
+            );
+
             return this.prisma.medicalReport.update({
                 where: { id },
                 data: {
                     deliveryStatus: ReportDeliveryStatus.FAILED,
-                    deliveryError: error instanceof Error ? error.message : 'Failed to send report',
+                    deliveryError: error instanceof Error ? error.message : 'Failed to send report via WhatsApp',
                 },
                 include: this.defaultInclude(),
             });

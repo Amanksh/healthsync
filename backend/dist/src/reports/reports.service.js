@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var ReportsService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReportsService = void 0;
 const common_1 = require("@nestjs/common");
@@ -16,6 +17,7 @@ const crypto_1 = require("crypto");
 const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../prisma/prisma.service");
 const upload_service_1 = require("../upload/upload.service");
+const whatsapp_service_1 = require("../whatsapp/whatsapp.service");
 const REPORT_TYPE_LABELS = {
     BLOOD_REPORT: 'Blood report',
     ECG: 'ECG report',
@@ -23,14 +25,17 @@ const REPORT_TYPE_LABELS = {
     XRAY: 'X-ray report',
     OTHER: 'Medical report',
 };
-let ReportsService = class ReportsService {
+let ReportsService = ReportsService_1 = class ReportsService {
     prisma;
     uploadService;
     configService;
-    constructor(prisma, uploadService, configService) {
+    whatsAppService;
+    logger = new common_1.Logger(ReportsService_1.name);
+    constructor(prisma, uploadService, configService, whatsAppService) {
         this.prisma = prisma;
         this.uploadService = uploadService;
         this.configService = configService;
+        this.whatsAppService = whatsAppService;
     }
     async create(dto, file, hospitalId, uploadedById) {
         if (!hospitalId) {
@@ -123,42 +128,28 @@ let ReportsService = class ReportsService {
             throw new common_1.BadRequestException('Patient does not have a phone number');
         }
         const message = this.buildPatientMessage(report);
-        const webhookUrl = this.configService.get('REPORT_MESSAGE_WEBHOOK_URL');
         try {
-            if (webhookUrl) {
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        to: report.patient.phone,
-                        patientId: report.patient.id,
-                        reportId: report.id,
-                        reportType: report.type,
-                        fileUrl: report.fileUrl,
-                        message,
-                    }),
-                });
-                if (!response.ok) {
-                    throw new Error(`Messaging provider returned ${response.status}`);
-                }
-            }
-            const deliveryError = webhookUrl ? null : 'Dry run: REPORT_MESSAGE_WEBHOOK_URL is not configured';
+            const result = await this.whatsAppService.sendMessage(report.patient.phone, message, report.fileUrl);
+            this.logger.log(`Report ${id} sent to ${report.patient.phone} — SID: ${result.sid}`);
             return this.prisma.medicalReport.update({
                 where: { id },
                 data: {
                     deliveryStatus: client_1.ReportDeliveryStatus.SENT,
                     deliveredAt: new Date(),
-                    deliveryError,
+                    deliveryError: result.status === 'skipped'
+                        ? 'Dry run: Twilio credentials not configured'
+                        : null,
                 },
                 include: this.defaultInclude(),
             });
         }
         catch (error) {
+            this.logger.error(`Failed to send report ${id} to ${report.patient.phone}: ${error}`);
             return this.prisma.medicalReport.update({
                 where: { id },
                 data: {
                     deliveryStatus: client_1.ReportDeliveryStatus.FAILED,
-                    deliveryError: error instanceof Error ? error.message : 'Failed to send report',
+                    deliveryError: error instanceof Error ? error.message : 'Failed to send report via WhatsApp',
                 },
                 include: this.defaultInclude(),
             });
@@ -202,10 +193,11 @@ let ReportsService = class ReportsService {
     }
 };
 exports.ReportsService = ReportsService;
-exports.ReportsService = ReportsService = __decorate([
+exports.ReportsService = ReportsService = ReportsService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         upload_service_1.UploadService,
-        config_1.ConfigService])
+        config_1.ConfigService,
+        whatsapp_service_1.WhatsAppService])
 ], ReportsService);
 //# sourceMappingURL=reports.service.js.map

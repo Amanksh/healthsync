@@ -21,6 +21,7 @@ const upload_module_1 = require("./upload/upload.module");
 const pharmacy_module_1 = require("./pharmacy/pharmacy.module");
 const reports_module_1 = require("./reports/reports.module");
 const ward_module_1 = require("./ward/ward.module");
+const whatsapp_module_1 = require("./whatsapp/whatsapp.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -40,6 +41,7 @@ exports.AppModule = AppModule = __decorate([
             pharmacy_module_1.PharmacyModule,
             reports_module_1.ReportsModule,
             ward_module_1.WardModule,
+            whatsapp_module_1.WhatsAppModule,
         ],
     })
 ], AppModule);
